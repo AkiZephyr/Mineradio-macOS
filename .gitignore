@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-*/
+out/
+release/
+releases/
+win-unpacked/
+*.exe
+*.msi
+*.blockmap
+*.zip
+*.7z
+*.asar
+
+# User data and private state
+.cookie
+.qq-cookie
+updates/
+*.log
+*.tmp
+*.cache
+.env
+.env.*
+
+# Local development noise
+.DS_Store
+Thumbs.db
+desktop.ini
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Historical local experiment files
+public/index.*.html
+!public/index.html
+
+# Screenshots and transient verification artifacts
+*.png.tmp
+verification/
+screenshots/
