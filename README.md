@@ -24,10 +24,20 @@ Mineradio macOS 是基于 [XxHuberrr/Mineradio](https://github.com/XxHuberrr/Min
 macOS 适配状态：
 
 - 已支持在 macOS 上开发运行
+- 当前公开安装包主要面向 Apple Silicon Mac（arm64 / M 系列芯片）
 - 已支持生成 macOS `.app`、`.dmg` 和 `.zip`
 - 已将节奏分析缓存、登录 Cookie 和更新下载目录迁移到用户数据目录
 - 已按平台选择更新资产，macOS 优先使用 `latest-mac.yml` 和 `.dmg` / `.zip`
 - 已去除 macOS 上不适用的 Windows Direct3D Chromium 参数
+
+## 支持范围
+
+当前 Release 安装包优先支持并测试 Apple Silicon Mac：
+
+- Apple Silicon：已发布 arm64 安装包，适用于 M1 / M2 / M3 / M4 系列 Mac
+- Intel Mac：暂未作为正式支持平台发布，后续会根据测试条件和用户反馈评估 x64 或 Universal 安装包
+
+如果你使用的是 Intel Mac，请暂时不要把当前 arm64 安装包视为可用版本。欢迎在 Issues 中反馈设备型号、macOS 版本和启动日志，方便后续补齐兼容性验证。
 
 ## 核心特性
 
@@ -54,17 +64,19 @@ npm start
 npm run build:mac:dir
 ```
 
-生成当前 Mac 架构的 `.dmg` 和 `.zip`：
+生成当前 Mac 架构的 `.dmg` 和 `.zip`。当前公开 Release 主要使用 Apple Silicon / arm64 构建：
 
 ```bash
 npm run build:mac
 ```
 
-正式同时发布 Intel 与 Apple Silicon 产物时使用：
+如需同时构建 Intel x64 与 Apple Silicon arm64 产物，可以使用：
 
 ```bash
 npm run build:mac:all
 ```
+
+注意：`build:mac:all` 只代表构建配置保留了 x64 能力，不代表 Intel Mac 已经完成正式适配和发布验证。
 
 未配置 Apple Developer ID 时，可以临时跳过签名做本地构建验证：
 
