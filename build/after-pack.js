@@ -44,7 +44,9 @@ function signDarwinAdhoc(context) {
   if (process.env.MINERADIO_ADHOC_SIGN !== 'true') return;
   const appName = context.packager.appInfo.productFilename || 'Mineradio';
   const appPath = path.join(context.appOutDir, `${appName}.app`);
+  const entitlementsPath = path.join(context.packager.info.buildResourcesDir, 'entitlements.mac.plist');
   if (!fs.existsSync(appPath)) throw new Error(`Mineradio app bundle was not found: ${appPath}`);
+  if (!fs.existsSync(entitlementsPath)) throw new Error(`Mineradio macOS entitlements were not found: ${entitlementsPath}`);
   console.log(`  • applying ad-hoc macOS signature  app=${appPath}`);
   execFileSync('codesign', [
     '--force',
@@ -53,6 +55,8 @@ function signDarwinAdhoc(context) {
     '-',
     '--options',
     'runtime',
+    '--entitlements',
+    entitlementsPath,
     appPath
   ], { stdio: 'inherit' });
 }
