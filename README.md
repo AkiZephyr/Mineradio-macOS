@@ -29,13 +29,6 @@ macOS 适配状态：
 - 已按平台选择更新资产，macOS 优先使用 `latest-mac.yml` 和 `.dmg` / `.zip`
 - 已去除 macOS 上不适用的 Windows Direct3D Chromium 参数
 
-需要继续完善：
-
-- 正式发布前的 Developer ID 签名和 notarization
-- Intel 与 Apple Silicon 双架构发布流程
-- macOS 桌面壁纸模式的体验打磨
-- 更完整的 Mac 安装和首次打开指引
-
 ## 核心特性
 
 - Open-Meteo 天气电台，根据位置、城市和天气 mood 生成播放队列
