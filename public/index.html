@@ -2827,7 +2827,7 @@ var updatePreviewState = {
   currentVersion: '0.9.11',
   version: '1.1.0',
   configured: false,
-  preview: true,
+  preview: false,
   updateAvailable: false,
   releaseUrl: '',
   downloadUrl: '',
@@ -2848,9 +2848,9 @@ var updatePreviewState = {
   patchFallbackTried: false,
   hero: '当前版本，更新检测已就绪。',
   notes: [
-    '安装包文字对比修复',
-    '安装目录可自由选择',
-    '单实例与快捷方式修复'
+    '已连接 macOS 维护版 Release',
+    '有新版本时下载 Mac 更新包',
+    '当前版本会保持静默'
   ]
 };
 function readSavedVolume() {
@@ -22767,6 +22767,14 @@ function renderUpdatePreviewPanel() {
   syncUpdatePreviewStateClass();
 }
 
+function updatePackageLabel() {
+  return /Mac/i.test(String(navigator.platform || '')) ? 'Mac 更新包' : '更新包';
+}
+
+function fullUpdatePackageLabel() {
+  return /Mac/i.test(String(navigator.platform || '')) ? '下载 Mac 更新包' : '下载更新包';
+}
+
 function syncUpdatePreviewStateClass() {
   var entry = document.getElementById('update-entry');
   var modal = document.querySelector('#update-modal .update-modal');
@@ -22787,27 +22795,30 @@ function syncUpdatePreviewStateClass() {
   var btn = document.getElementById('update-primary-btn');
   var canDownloadUpdate = updatePreviewState.configured && updatePreviewState.updateAvailable && updatePreviewState.downloadUrl;
   var canOpenRelease = updatePreviewState.configured && updatePreviewState.updateAvailable && !updatePreviewState.downloadUrl && updatePreviewState.releaseUrl;
+  var packageLabel = updatePackageLabel();
   if (label) {
     if (isDownloading) label.textContent = (isPatch ? '快速补丁 ' : '正在下载 ') + Math.round(updatePreviewState.progress) + '%';
-    else if (isOpening) label.textContent = '正在打开安装包';
-    else if (isError && updatePreviewState.mode === 'patch' && updatePreviewState.downloadUrl) label.textContent = '下载完整安装包';
+    else if (isOpening) label.textContent = '正在打开 ' + packageLabel;
+    else if (isError && updatePreviewState.mode === 'patch' && updatePreviewState.downloadUrl) label.textContent = fullUpdatePackageLabel();
     else if (isError) label.textContent = updatePreviewState.mode === 'installer' ? '重试下载' : '重试更新';
     else if (isReady && isPatch && updatePreviewState.restartRequired) label.textContent = '重启生效';
     else if (isReady && isPatch) label.textContent = '补丁已应用';
-    else if (isReady && updatePreviewState.installerOpened) label.textContent = '安装包已打开';
-    else if (isReady && updatePreviewState.installerPath) label.textContent = updatePreviewState.cached ? '打开已下载安装包' : '打开安装包';
-    else if (isReady) label.textContent = updatePreviewState.configured ? '打开安装包' : '预览完成';
-    else label.textContent = updatePreviewState.patchAvailable ? '安装快速补丁' : ((canDownloadUpdate || canOpenRelease) ? '下载完整安装包' : '立即更新');
+    else if (isReady && updatePreviewState.installerOpened) label.textContent = packageLabel + '已打开';
+    else if (isReady && updatePreviewState.installerPath) label.textContent = updatePreviewState.cached ? '打开已下载的 ' + packageLabel : '打开 ' + packageLabel;
+    else if (isReady) label.textContent = updatePreviewState.configured ? '打开 ' + packageLabel : '预览完成';
+    else if (canOpenRelease) label.textContent = '查看 Release';
+    else label.textContent = updatePreviewState.patchAvailable ? '安装快速补丁' : (canDownloadUpdate ? fullUpdatePackageLabel() : '立即更新');
   }
   if (btn) btn.disabled = false;
   var foot = document.getElementById('update-footnote');
   if (foot) {
-    if (isDownloading) foot.textContent = (updatePreviewState.message || (isPatch ? '正在下载快速补丁' : '正在下载完整安装包')) + (updateProgressDetailText() ? ' · ' + updateProgressDetailText() : '');
+    if (isDownloading) foot.textContent = (updatePreviewState.message || (isPatch ? '正在下载快速补丁' : '正在下载 ' + packageLabel)) + (updateProgressDetailText() ? ' · ' + updateProgressDetailText() : '');
     else if (isError) foot.textContent = '下载失败：' + (updatePreviewState.errorReason || updatePreviewState.errorDetail || updatePreviewState.message || '请稍后重试') + (updatePreviewState.failedAttempts && updatePreviewState.failedAttempts.length ? ' · 已尝试 ' + updatePreviewState.failedAttempts.length + ' 条线路' : '');
     else if (isReady && isPatch) foot.textContent = updatePreviewState.restartRequired ? '快速补丁已应用，重启 Mineradio 后生效。' : '快速补丁已应用。';
-    else if (isReady) foot.textContent = updatePreviewState.cached ? '已复用上次校验通过的安装包，不会重复下载。' : '安装包已准备好，点击按钮后再打开安装。';
-    else if (updatePreviewState.patchAvailable) foot.textContent = '优先使用轻量补丁，只更新缺失或变更的资源文件；不适用时可下载完整安装包。';
-    else foot.textContent = updatePreviewState.updateAvailable ? '没有可用快速补丁时会下载完整安装包。' : '当前版本已是最新。';
+    else if (isReady) foot.textContent = updatePreviewState.cached ? '已复用上次校验通过的 ' + packageLabel + '，不会重复下载。' : packageLabel + '已准备好，点击按钮后再打开。';
+    else if (canOpenRelease) foot.textContent = '这个版本没有可自动下载的 Mac 更新包，可打开 Release 页面手动查看。';
+    else if (updatePreviewState.patchAvailable) foot.textContent = '优先使用轻量补丁，只更新缺失或变更的资源文件；不适用时可下载完整更新包。';
+    else foot.textContent = updatePreviewState.updateAvailable ? '没有可用快速补丁时会下载完整更新包。' : '当前版本已是最新。';
   }
 }
 
@@ -22894,7 +22905,7 @@ async function startRealUpdateDownload() {
   updatePreviewState.errorReason = '';
   updatePreviewState.errorDetail = '';
   updatePreviewState.failedAttempts = [];
-  updatePreviewState.message = '正在下载完整安装包';
+  updatePreviewState.message = '正在下载 ' + updatePackageLabel();
   updateUpdatePreviewProgress(0);
   try {
     var job = await apiJson('/api/update/download', { method: 'POST' });
@@ -22956,7 +22967,7 @@ async function startRealUpdatePatch() {
     updatePreviewState.message = updatePreviewState.errorReason;
     updateUpdatePreviewProgress(0);
     updatePreviewState.patchFallbackTried = true;
-    showToast('快速补丁不可用，可手动下载完整安装包');
+    showToast('快速补丁不可用，可手动下载完整更新包');
   }
 }
 
@@ -23013,7 +23024,7 @@ function applyUpdateDownloadJob(job) {
     updateUpdatePreviewProgress(job && job.progress || updatePreviewState.progress || 0);
     if (updatePreviewState.mode === 'patch' && updatePreviewState.downloadUrl && !updatePreviewState.patchFallbackTried) {
       updatePreviewState.patchFallbackTried = true;
-      showToast('快速补丁失败，可手动下载完整安装包：' + updatePreviewState.errorReason);
+      showToast('快速补丁失败，可手动下载完整更新包：' + updatePreviewState.errorReason);
       return;
     }
     showToast('更新下载失败：' + updatePreviewState.errorReason);
@@ -23050,7 +23061,7 @@ function applyUpdateDownloadJob(job) {
     if (updatePreviewState.mode === 'patch') {
       showToast(updatePreviewState.restartRequired ? '快速补丁已应用，重启后生效' : '快速补丁已应用');
     } else if (updatePreviewState.installerPath) {
-      showToast(updatePreviewState.cached ? '已复用上次下载的安装包' : '安装包已下载，点击按钮打开');
+      showToast(updatePreviewState.cached ? '已复用上次下载的 ' + updatePackageLabel() : updatePackageLabel() + '已下载，点击按钮打开');
     }
   }
 }
@@ -23077,7 +23088,7 @@ async function openDownloadedUpdateInstaller(filePath) {
       updatePreviewState.installerOpened = true;
       updatePreviewState.status = 'ready';
       syncUpdatePreviewStateClass();
-      showToast('安装包已打开');
+      showToast(updatePackageLabel() + '已打开');
       return;
     }
     throw new Error('DESKTOP_BRIDGE_MISSING');
@@ -23085,7 +23096,7 @@ async function openDownloadedUpdateInstaller(filePath) {
     updatePreviewState.status = 'ready';
     syncUpdatePreviewStateClass();
     if (updatePreviewState.releaseUrl) window.open(updatePreviewState.releaseUrl, '_blank');
-    showToast('无法自动打开安装包，已尝试打开更新页面');
+    showToast('无法自动打开 ' + updatePackageLabel() + '，已尝试打开更新页面');
   }
 }
 

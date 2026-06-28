@@ -404,10 +404,7 @@ function extractReleaseNotes(body) {
 }
 function pickReleaseAsset(assets) {
   const list = Array.isArray(assets) ? assets : [];
-  const preferred = list.find(a => isCurrentPlatformReleaseAsset(a && a.name || ''))
-    || list.find(a => /\.(exe|msi)$/i.test(a && a.name || ''))
-    || list.find(a => /\.(zip|7z)$/i.test(a && a.name || ''))
-    || list[0];
+  const preferred = list.find(a => isCurrentPlatformReleaseAsset(a && a.name || ''));
   if (!preferred) return null;
   const digest = assetDigestInfo(preferred);
   const candidates = uniqueDownloadCandidates(preferred.browser_download_url || '');
@@ -522,6 +519,8 @@ function normalizeManifestUpdateInfo(data) {
       notes,
     },
     source: 'manifest',
+    platform: process.platform,
+    updateFeed: UPDATE_CONFIG.configured ? `${UPDATE_CONFIG.owner}/${UPDATE_CONFIG.repo}` : '',
   };
 }
 async function readUpdateManifest(ref) {
@@ -626,8 +625,10 @@ function localUpdateFallback(reason, opts) {
       htmlUrl: '',
       downloadUrl: '',
       summary: '当前版本，更新检测已就绪。',
-      notes: UPDATE_FALLBACK_NOTES,
+      notes: UPDATE_CONFIG.configured ? ['已连接 AkiZephyr/Mineradio-macOS Releases', '有新版本时会优先下载 macOS 更新包'] : UPDATE_FALLBACK_NOTES,
     },
+    platform: process.platform,
+    updateFeed: UPDATE_CONFIG.configured ? `${UPDATE_CONFIG.owner}/${UPDATE_CONFIG.repo}` : '',
     reason: reason || '',
   };
 }
@@ -642,7 +643,7 @@ function classifyUpdateError(err) {
   const message = String(err && err.message || err || '').trim();
   const detail = message || code || '未知错误';
   if (/HASH|DIGEST|CHECKSUM/i.test(code + ' ' + message)) {
-    return { code: code || 'UPDATE_HASH_MISMATCH', reason: '文件校验失败，可能是线路缓存异常，已拦截该安装包。', detail };
+    return { code: code || 'UPDATE_HASH_MISMATCH', reason: '文件校验失败，可能是线路缓存异常，已拦截该更新包。', detail };
   }
   if (/SIZE_MISMATCH|content length/i.test(code + ' ' + message)) {
     return { code: code || 'UPDATE_SIZE_MISMATCH', reason: '下载文件大小不一致，可能是网络中断或线路缓存不完整。', detail };
@@ -743,6 +744,8 @@ function parseLatestYmlUpdateInfo(text, reason) {
       notes: ['更新检测已切换到备用线路', '下载时会自动选择国内加速线路', '下载失败会显示具体原因和当前速度'],
     },
     source: 'latest-yml',
+    platform: process.platform,
+    updateFeed: UPDATE_CONFIG.configured ? `${UPDATE_CONFIG.owner}/${UPDATE_CONFIG.repo}` : '',
     reason: reason || '',
   };
 }
@@ -796,6 +799,8 @@ async function fetchLatestUpdateInfo() {
         summary: notes[0] || '发现新版本，建议更新。',
         notes,
       },
+      platform: process.platform,
+      updateFeed: `${UPDATE_CONFIG.owner}/${UPDATE_CONFIG.repo}`,
     };
   } catch (err) {
     const reason = err && err.message || 'Update check failed';
@@ -872,7 +877,7 @@ async function downloadUpdateAsset(job) {
     job.progress = 0;
     job.speedBps = 0;
     job.etaSeconds = 0;
-    job.message = job.total ? '正在下载完整安装包' : '正在下载完整安装包，等待服务器返回大小';
+    job.message = job.total ? '正在下载更新包' : '正在下载更新包，等待服务器返回大小';
     job.updatedAt = Date.now();
     let speedWindowAt = Date.now();
     let speedWindowBytes = 0;
@@ -899,7 +904,7 @@ async function downloadUpdateAsset(job) {
           const kb = Math.max(1, job.received / 1024);
           job.progress = Math.max(1, Math.min(88, Math.round(Math.log10(kb + 1) * 24)));
         }
-        job.message = job.total > 0 ? '正在下载完整安装包' : '正在下载完整安装包，服务器未提供总大小';
+        job.message = job.total > 0 ? '正在下载更新包' : '正在下载更新包，服务器未提供总大小';
         job.updatedAt = Date.now();
         if (!writer.write(buf)) await once(writer, 'drain');
       }
@@ -912,7 +917,7 @@ async function downloadUpdateAsset(job) {
     fs.renameSync(tmpPath, job.filePath);
     job.status = 'ready';
     job.progress = 100;
-    job.message = '安装包已下载';
+    job.message = '更新包已下载';
     job.updatedAt = Date.now();
   } catch (e) {
     try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (_) {}
@@ -978,7 +983,7 @@ function reuseVerifiedInstallerJob(opts) {
     attempt: 0,
     attempts: opts.attempts || 0,
     mode: 'installer',
-    message: '安装包已下载，可直接打开安装',
+    message: '更新包已下载，可直接打开',
     fileName: opts.fileName || path.basename(opts.filePath),
     filePath: opts.filePath,
     version: opts.version || '',
@@ -1044,7 +1049,7 @@ async function downloadUpdateAssetWithMirrors(job) {
       try { if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath); } catch (_) {}
       ensureMirrorCanBeVerified(job, candidate);
       prepareUpdateJobAttempt(job, candidate, i, candidates.length);
-      job.message = job.total ? '正在下载完整安装包' : '正在下载完整安装包，等待服务器返回大小';
+      job.message = job.total ? '正在下载更新包' : '正在下载更新包，等待服务器返回大小';
 
       const resp = await fetchWithTimeout(candidate.url, {
         headers: { 'User-Agent': `Mineradio/${APP_VERSION}` },
@@ -1080,7 +1085,7 @@ async function downloadUpdateAssetWithMirrors(job) {
             const kb = Math.max(1, job.received / 1024);
             job.progress = Math.max(1, Math.min(88, Math.round(Math.log10(kb + 1) * 24)));
           }
-          job.message = job.total > 0 ? '正在下载完整安装包' : '正在下载完整安装包，服务器未提供总大小';
+          job.message = job.total > 0 ? '正在下载更新包' : '正在下载更新包，服务器未提供总大小';
           job.updatedAt = Date.now();
           if (!writer.write(buf)) await once(writer, 'drain');
         }
@@ -1095,7 +1100,7 @@ async function downloadUpdateAssetWithMirrors(job) {
       job.status = 'ready';
       job.progress = 100;
       job.etaSeconds = 0;
-      job.message = '安装包已下载';
+      job.message = '更新包已下载';
       job.updatedAt = Date.now();
       return;
     } catch (err) {
@@ -1284,7 +1289,7 @@ async function downloadAndApplyPatch(job) {
   } catch (e) {
     job.status = 'error';
     job.error = e.message || 'PATCH_APPLY_FAILED';
-    job.message = '快速补丁失败，可改用完整安装包';
+    job.message = '快速补丁失败，可改用完整更新包';
     job.updatedAt = Date.now();
   }
 }
