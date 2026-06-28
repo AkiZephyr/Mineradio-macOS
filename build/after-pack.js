@@ -40,7 +40,28 @@ function resolveRcedit(projectDir) {
   return hit;
 }
 
+function signDarwinAdhoc(context) {
+  if (process.env.MINERADIO_ADHOC_SIGN !== 'true') return;
+  const appName = context.packager.appInfo.productFilename || 'Mineradio';
+  const appPath = path.join(context.appOutDir, `${appName}.app`);
+  if (!fs.existsSync(appPath)) throw new Error(`Mineradio app bundle was not found: ${appPath}`);
+  console.log(`  • applying ad-hoc macOS signature  app=${appPath}`);
+  execFileSync('codesign', [
+    '--force',
+    '--deep',
+    '--sign',
+    '-',
+    '--options',
+    'runtime',
+    appPath
+  ], { stdio: 'inherit' });
+}
+
 module.exports = async function afterPack(context) {
+  if (context.electronPlatformName === 'darwin') {
+    signDarwinAdhoc(context);
+    return;
+  }
   if (context.electronPlatformName !== 'win32') return;
 
   const appName = context.packager.appInfo.productFilename || 'Mineradio';
