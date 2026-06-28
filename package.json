@@ -2,12 +2,15 @@
   "name": "mineradio",
   "productName": "Mineradio",
   "version": "1.1.1",
-  "description": "沉浸式音乐播放器，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
+  "description": "Mineradio 的非官方 macOS 适配维护版，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
   "author": "Mineradio",
   "main": "desktop/main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
+    "build:mac": "electron-builder --mac dmg zip",
+    "build:mac:all": "electron-builder --mac dmg zip --x64 --arm64",
+    "build:mac:dir": "electron-builder --mac dir",
     "build:win": "electron-builder --win nsis",
     "build:win:dir": "electron-builder --win dir"
   },
@@ -46,6 +49,30 @@
         }
       ]
     },
+    "mac": {
+      "icon": "build/icon.png",
+      "category": "public.app-category.music",
+      "artifactName": "Mineradio-${version}-mac-${arch}.${ext}",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "artifactName": "Mineradio-${version}-mac-${arch}.${ext}"
+    },
     "nsis": {
       "oneClick": false,
       "perMachine": false,
@@ -64,16 +91,16 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "XxHuberrr",
-        "repo": "Mineradio"
+        "owner": "AkiZephyr",
+        "repo": "Mineradio-macOS"
       }
     ]
   },
   "mineradio": {
     "update": {
       "provider": "github",
-      "owner": "XxHuberrr",
-      "repo": "Mineradio",
+      "owner": "AkiZephyr",
+      "repo": "Mineradio-macOS",
       "preview": true,
       "preferMirrors": true,
       "mirrors": [
