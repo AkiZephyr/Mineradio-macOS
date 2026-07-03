@@ -25,11 +25,11 @@ let mainWindowStateTimer = null;
 const registeredGlobalHotkeys = new Map();
 
 const WINDOWED_ASPECT = 16 / 9;
-const WINDOWED_SCALE = 0.64;
-const DEFAULT_WINDOWED_WIDTH = 960;
+const WINDOWED_SCALE = 0.72;
+const DEFAULT_WINDOWED_WIDTH = 1180;
 const WINDOWED_MARGIN = 32;
-const MIN_WINDOWED_WIDTH = 860;
-const MIN_WINDOWED_HEIGHT = 484;
+const MIN_WINDOWED_WIDTH = 960;
+const MIN_WINDOWED_HEIGHT = 540;
 const APP_NAME = 'Mineradio';
 const APP_USER_MODEL_ID = 'com.mineradio.desktop';
 const APP_ICON_ICO = path.join(__dirname, '..', 'build', 'icon.ico');
@@ -378,21 +378,44 @@ trap cleanup EXIT
 LOWER_SOURCE="$(printf '%s' "$SOURCE" | tr '[:upper:]' '[:lower:]')"
 SOURCE_APP=""
 
+valid_app_bundle() {
+  local candidate="$1"
+  [[ -d "$candidate" ]] || return 1
+  [[ -f "$candidate/Contents/Info.plist" ]] || return 1
+  [[ -d "$candidate/Contents/MacOS" ]] || return 1
+  return 0
+}
+
+find_valid_app_bundle() {
+  local root="$1"
+  local preferred="$2"
+  local candidate=""
+  if valid_app_bundle "$preferred"; then
+    printf '%s\\n' "$preferred"
+    return 0
+  fi
+  while IFS= read -r candidate; do
+    if valid_app_bundle "$candidate"; then
+      printf '%s\\n' "$candidate"
+      return 0
+    fi
+  done < <(find "$root" -maxdepth 5 -type d -name "*.app" -print)
+  return 1
+}
+
 if [[ "$LOWER_SOURCE" == *.dmg ]]; then
   ATTACH_OUTPUT="$(hdiutil attach -nobrowse -readonly "$SOURCE")" || fail "cannot mount dmg"
   MOUNT_DIR="$(printf '%s\\n' "$ATTACH_OUTPUT" | awk -F '\\t' '/\\/Volumes\\// {print $NF; exit}')"
   [[ -n "$MOUNT_DIR" && -d "$MOUNT_DIR" ]] || fail "mounted volume not found"
-  SOURCE_APP="$(find "$MOUNT_DIR" -maxdepth 2 -type d -name "$APP_NAME.app" -print -quit)"
-  [[ -n "$SOURCE_APP" ]] || SOURCE_APP="$(find "$MOUNT_DIR" -maxdepth 2 -type d -name "*.app" -print -quit)"
+  SOURCE_APP="$(find_valid_app_bundle "$MOUNT_DIR" "$MOUNT_DIR/$APP_NAME.app")"
 elif [[ "$LOWER_SOURCE" == *.zip ]]; then
   ditto -x -k "$SOURCE" "$WORK_DIR/unzip" || fail "cannot unzip update"
-  SOURCE_APP="$(find "$WORK_DIR/unzip" -maxdepth 4 -type d -name "$APP_NAME.app" -print -quit)"
-  [[ -n "$SOURCE_APP" ]] || SOURCE_APP="$(find "$WORK_DIR/unzip" -maxdepth 4 -type d -name "*.app" -print -quit)"
+  SOURCE_APP="$(find_valid_app_bundle "$WORK_DIR/unzip" "$WORK_DIR/unzip/$APP_NAME.app")"
 else
   fail "unsupported update package"
 fi
 
-[[ -n "$SOURCE_APP" && -d "$SOURCE_APP" ]] || fail "app bundle not found in update package"
+[[ -n "$SOURCE_APP" ]] || fail "valid app bundle not found in update package"
 
 TARGET_PARENT="$(dirname "$TARGET")"
 mkdir -p "$TARGET_PARENT" || fail "cannot prepare target parent"

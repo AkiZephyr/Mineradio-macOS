@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.1.3
+
+- 修复 `v1.1.2` macOS 安装包结构错误：安装到 `/Applications` 后不再出现外层 `Mineradio.app` 套内层 `Mineradio.app`，避免图标丢失和 damaged/incomplete 提示。
+- 应用内更新安装脚本现在只会复制真正包含 `Contents/Info.plist` 的有效 `.app`，避免错误识别外层目录或坏包结构。
+- 默认窗口尺寸调大，减少首页卡片、搜索栏和右侧组件在首次启动时显示不全的问题。
+- Release 增加 macOS `.pkg` 安装包，手动下载时可双击安装，减少拖拽 DMG 和手动 Replace 的步骤。
+
 ## v1.1.2
 
 - macOS 窗口体验优化：使用原生红黄绿窗口按钮，支持放大/还原，并调整默认窗口尺寸，避免启动时界面过宽或控件压在启动页上。

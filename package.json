@@ -1,7 +1,7 @@
 {
   "name": "mineradio",
   "productName": "Mineradio",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "Mineradio 的非官方 macOS 适配维护版，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
   "author": "Mineradio",
   "main": "desktop/main.js",
@@ -10,8 +10,8 @@
     "start": "electron .",
     "sign:electron:mac": "codesign --force --deep --sign - --options runtime --entitlements build/entitlements.mac.plist node_modules/electron/dist/Electron.app",
     "dev:mac": "npm run sign:electron:mac && open -n node_modules/electron/dist/Electron.app --args \"$PWD\"",
-    "build:mac": "electron-builder --mac dmg zip",
-    "build:mac:all": "electron-builder --mac dmg zip --x64 --arm64",
+    "build:mac": "electron-builder --mac dmg zip pkg",
+    "build:mac:all": "electron-builder --mac dmg zip pkg --x64 --arm64",
     "build:mac:dir": "electron-builder --mac dir",
     "build:win": "electron-builder --win nsis",
     "build:win:dir": "electron-builder --win dir"
@@ -72,10 +72,19 @@
             "x64",
             "arm64"
           ]
+        },
+        {
+          "target": "pkg",
+          "arch": [
+            "arm64"
+          ]
         }
       ]
     },
     "dmg": {
+      "artifactName": "Mineradio-${version}-mac-${arch}.${ext}"
+    },
+    "pkg": {
       "artifactName": "Mineradio-${version}-mac-${arch}.${ext}"
     },
     "nsis": {
