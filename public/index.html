@@ -38,16 +38,24 @@ body::after,#desktop-window-shell::after{content:none}
 body.desktop-shell{background:transparent}
 body.desktop-shell #desktop-window-shell{display:block;position:fixed;inset:0;overflow:hidden;border-radius:34px;clip-path:inset(0 round 34px);background:transparent;box-shadow:0 24px 80px rgba(0,0,0,.46);transform:translateZ(0)}
 body.desktop-shell.desktop-maximized #desktop-window-shell,body.desktop-shell.desktop-fullscreen #desktop-window-shell,html:fullscreen body.desktop-shell #desktop-window-shell{border-radius:0!important;clip-path:none!important;box-shadow:none!important}
-body.desktop-shell #desktop-titlebar{position:fixed;z-index:500;top:0;left:0;right:0;height:44px;padding:0 12px 0 18px;display:flex;align-items:center;justify-content:space-between;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;-webkit-app-region:drag;pointer-events:none}
+body.desktop-shell #desktop-titlebar{position:fixed;z-index:500;top:0;left:0;right:0;height:44px;padding:0 12px 0 14px;display:flex;align-items:center;justify-content:space-between;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;-webkit-app-region:drag;pointer-events:none}
 body.desktop-shell #desktop-titlebar::after{content:none}
 .desktop-drag-region{height:100%;flex:1;display:flex;align-items:center;gap:9px;min-width:0;color:rgba(224,250,255,.74);font-size:12px;font-weight:600;letter-spacing:0;text-transform:uppercase;-webkit-app-region:drag;pointer-events:auto}
+body.desktop-platform-darwin .desktop-drag-region{margin-left:66px}
 .desktop-app-mark{display:none}
 .desktop-app-title{display:none}
-.desktop-window-controls{display:flex;align-items:center;gap:6px;padding:0;border-radius:0;background:transparent;box-shadow:none;-webkit-app-region:no-drag;pointer-events:auto}
-.desktop-window-btn{width:38px;height:30px;border:0;border-radius:10px;background:rgba(4,8,10,.42);color:rgba(224,250,255,.72);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .18s,color .18s,transform .18s}
-.desktop-window-btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none}
-.desktop-window-btn:hover{background:rgba(244,210,138,.14);color:#fff1bd;transform:translateY(-1px)}
-.desktop-window-btn.close:hover{background:rgba(255,86,100,.86);color:#fff}
+.desktop-window-controls{display:flex;align-items:center;gap:8px;padding:0;border-radius:0;background:transparent;box-shadow:none;-webkit-app-region:no-drag;pointer-events:auto}
+.desktop-title-actions{display:flex;align-items:center;gap:6px;-webkit-app-region:no-drag;pointer-events:auto}
+body.splash-active .desktop-title-actions{opacity:0;pointer-events:none}
+.desktop-window-btn{position:relative;width:12px;height:12px;border:0;border-radius:50%;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(60,45,38,.82);box-shadow:inset 0 0 0 1px rgba(0,0,0,.16),0 1px 3px rgba(0,0,0,.18);transition:filter .16s,transform .16s,box-shadow .16s}
+.desktop-window-btn[data-window-action="close"]{background:#ff5f57}
+.desktop-window-btn[data-window-action="minimize"]{background:#febc2e}
+.desktop-window-btn[data-window-action="maximize"]{background:#28c840}
+.desktop-window-btn svg{width:8px;height:8px;stroke:currentColor;stroke-width:2.2;fill:none;opacity:0;transition:opacity .12s}
+.desktop-window-controls:hover .desktop-window-btn svg,.desktop-window-btn:focus-visible svg{opacity:.74}
+.desktop-window-btn:hover{filter:brightness(1.06) saturate(1.05);transform:scale(1.06);box-shadow:inset 0 0 0 1px rgba(0,0,0,.20),0 1px 4px rgba(0,0,0,.24)}
+.desktop-window-btn.close:hover{background:#ff5f57;color:rgba(65,30,32,.88)}
+body.desktop-platform-darwin .desktop-window-controls{display:none}
 .desktop-mode-btn{height:30px;min-width:78px;padding:0 12px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(4,8,10,.42);color:rgba(224,250,255,.70);font-family:inherit;font-size:11px;font-weight:760;letter-spacing:.08em;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background .18s,color .18s,transform .18s,border-color .18s,box-shadow .18s}
 .desktop-mode-btn::before{content:'';width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);box-shadow:0 0 0 rgba(255,83,103,0);transition:background .18s,box-shadow .18s}
 .desktop-mode-btn:hover{background:rgba(255,83,103,.10);border-color:rgba(255,83,103,.34);color:#fff;transform:translateY(-1px)}
@@ -129,14 +137,14 @@ body.idle-guide-dragging #canvas-container{cursor:grabbing}
 .splash-word-i::before{content:'';position:absolute;left:50%;bottom:.015em;width:.108em;height:.565em;border-radius:.06em;background:linear-gradient(180deg,#f8edd1 0%,#d8bd78 100%);transform:translateX(-50%);box-shadow:0 0 14px rgba(244,210,138,.12)}
 .splash-word-i::after{content:'';position:absolute;left:50%;top:.035em;width:.142em;height:.142em;border-radius:50%;background:#fff;box-shadow:0 0 16px rgba(244,210,138,.44),0 0 36px rgba(255,255,255,.16);opacity:0;transform:translate(-50%,.22em) scale(.34);animation:splash-i-dot-pop 4200ms cubic-bezier(.22,1,.36,1) forwards}
 .splash-word-o{display:inline-block;position:relative;color:#d8c486;-webkit-text-fill-color:#d8c486}
-.splash-signal-line{position:relative;width:min(460px,54vw);height:2px;background:linear-gradient(90deg,transparent,rgba(122,215,194,.22),rgba(255,255,255,.78),rgba(244,210,138,.66),rgba(255,83,103,.22),transparent);opacity:0;transform:scaleX(.12);box-shadow:0 0 18px rgba(244,210,138,.24),0 0 34px rgba(122,215,194,.10);animation:splash-signal-line 4200ms cubic-bezier(.22,1,.36,1) forwards}
+.splash-signal-line{position:relative;margin-top:4px;width:min(420px,48vw);height:1px;background:linear-gradient(90deg,transparent,rgba(122,215,194,.18),rgba(255,255,255,.54),rgba(244,210,138,.46),rgba(255,83,103,.18),transparent);opacity:0;transform:scaleX(.12);box-shadow:0 0 14px rgba(244,210,138,.16),0 0 24px rgba(122,215,194,.08);animation:splash-signal-line 4200ms cubic-bezier(.22,1,.36,1) forwards}
 .splash-signal-line::after{content:'';position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.82);box-shadow:0 0 24px rgba(244,210,138,.54);transform:translate(-50%,-50%) scale(.32);opacity:0;animation:splash-signal-blip 4200ms cubic-bezier(.22,1,.36,1) forwards}
 .splash-sub{font-size:10px;font-weight:600;letter-spacing:.22em;color:rgba(255,255,255,.34);text-transform:uppercase;opacity:0;animation:splash-sub-in 4200ms cubic-bezier(.22,1,.36,1) forwards}
 .splash-enter{margin-top:8px;font-size:11px;font-weight:700;letter-spacing:.24em;color:rgba(255,255,255,.62);text-transform:uppercase;opacity:0;transform:translateY(10px);text-shadow:0 0 18px rgba(244,210,138,.24),0 0 34px rgba(122,215,194,.12);transition:opacity 620ms cubic-bezier(.22,1,.36,1),transform 620ms cubic-bezier(.22,1,.36,1)}
 #splash.ready .splash-enter{opacity:1;transform:translateY(0);animation:splash-enter-pulse 1800ms ease-in-out infinite alternate}
 @keyframes splash-field-breathe{0%{opacity:.72;transform:scale(1)}100%{opacity:1;transform:scale(1.035)}}
-@keyframes splash-mine-in{0%{opacity:0;clip-path:inset(48% 0 49% 0);transform:translate(calc(-50% - 10px),-42%) skewX(-10deg) scaleX(1.08);letter-spacing:.055em}14%{opacity:.92;clip-path:inset(40% 0 42% 0);transform:translate(calc(-50% - 4px),-50%) skewX(-4deg) scaleX(1.04);letter-spacing:.014em}26%{opacity:1;clip-path:inset(0);transform:translate(-50%,-50%) skewX(0) scaleX(1);letter-spacing:-.040em}48%{opacity:1;transform:translate(-50%,-50%) scale(1)}67%{opacity:1;transform:translate(calc(-50% - clamp(66px,10.8vw,130px)),-50%) scale(.998);letter-spacing:-.055em}100%{opacity:1;transform:translate(calc(-50% - clamp(66px,10.8vw,130px)),-50%) scale(.998)}}
-@keyframes splash-radio-in{0%,32%{opacity:0;clip-path:inset(52% 0 44% 0);transform:translate(calc(-50% + clamp(78px,12vw,142px)),-50%) skewX(9deg) scaleX(1.06);background-position:0 0}48%{opacity:.88;clip-path:inset(34% 0 32% 0);transform:translate(calc(-50% + clamp(72px,11.5vw,138px)),-50%) skewX(3deg) scaleX(1.02);background-position:52% 0}66%{opacity:1;clip-path:inset(0);transform:translate(calc(-50% + clamp(70px,11.4vw,136px)),-50%) scale(1);background-position:76% 0}100%{opacity:1;transform:translate(calc(-50% + clamp(70px,11.4vw,136px)),-50%) scale(1);background-position:100% 0}}
+@keyframes splash-mine-in{0%{opacity:0;transform:translate(-50%,-50%) scale(.965);filter:blur(10px);letter-spacing:.018em}24%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0);letter-spacing:-.030em}56%{opacity:1;transform:translate(-50%,-50%) scale(1);filter:blur(0);letter-spacing:-.030em}76%,100%{opacity:1;transform:translate(calc(-50% - clamp(74px,12.1vw,144px)),-50%) scale(.998);filter:blur(0);letter-spacing:-.055em}}
+@keyframes splash-radio-in{0%,64%{opacity:0;transform:translate(calc(-50% + clamp(98px,15.4vw,180px)),-50%) scale(.985);filter:blur(8px);background-position:0 0}80%{opacity:1;transform:translate(calc(-50% + clamp(74px,12.1vw,144px)),-50%) scale(1);filter:blur(0);background-position:76% 0}100%{opacity:1;transform:translate(calc(-50% + clamp(74px,12.1vw,144px)),-50%) scale(1);filter:blur(0);background-position:100% 0}}
 @keyframes splash-i-dot-pop{0%,48%{opacity:0;transform:translate(-50%,.22em) scale(.34)}60%{opacity:1;transform:translate(-50%,-.018em) scale(1.12)}68%{opacity:.92;transform:translate(-50%,.010em) scale(.94)}76%,100%{opacity:1;transform:translate(-50%,0) scale(1)}}
 @keyframes splash-signal-line{0%,28%{opacity:0;transform:scaleX(.10)}44%{opacity:.98;transform:scaleX(1.05)}64%{opacity:.70;transform:scaleX(.82)}76%{opacity:1;transform:scaleX(1.14);box-shadow:0 0 28px rgba(244,210,138,.36),0 0 60px rgba(122,215,194,.18)}100%{opacity:.30;transform:scaleX(.64)}}
 @keyframes splash-signal-blip{0%,42%{opacity:0;left:18%;transform:translate(-50%,-50%) scale(.24)}62%{opacity:.94;left:50%;transform:translate(-50%,-50%) scale(1)}76%{opacity:1;left:50%;transform:translate(-50%,-50%) scale(1.45)}100%{opacity:.16;left:82%;transform:translate(-50%,-50%) scale(.46)}}
@@ -1845,11 +1853,23 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
 <body>
 <div id="desktop-window-shell">
 <div id="desktop-titlebar" aria-label="window controls">
+  <div class="desktop-window-controls">
+    <button class="desktop-window-btn close" data-window-action="close" title="关闭" aria-label="关闭">
+      <svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+    </button>
+    <button class="desktop-window-btn" data-window-action="minimize" title="最小化" aria-label="最小化">
+      <svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg>
+    </button>
+    <button class="desktop-window-btn" data-window-action="maximize" title="放大" aria-label="放大">
+      <svg class="icon-maximize" viewBox="0 0 16 16"><path d="M5 11l6-6M7 5h4v4"/></svg>
+      <svg class="icon-restore" viewBox="0 0 16 16" style="display:none"><path d="M11 5l-6 6M5 7v4h4"/></svg>
+    </button>
+  </div>
   <div class="desktop-drag-region">
     <div class="desktop-app-mark" aria-hidden="true"></div>
     <div class="desktop-app-title" aria-hidden="true"></div>
   </div>
-  <div class="desktop-window-controls">
+  <div class="desktop-title-actions">
     <button id="visual-guide-btn" class="icon-btn" type="button" onclick="startVisualGuide({ manual: true })" title="查看使用引导" aria-label="查看使用引导">?</button>
     <button id="update-entry" class="update-entry" type="button" onclick="openUpdatePanel()" title="发现新版本" aria-label="发现新版本">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -1860,16 +1880,6 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
       </svg>
     </button>
     <button id="diy-mode-btn" class="desktop-mode-btn" type="button" onclick="toggleDiyMode()" title="开启 DIY 玩家模式" aria-label="开启 DIY 玩家模式" aria-pressed="false">DIY</button>
-    <button class="desktop-window-btn" data-window-action="minimize" title="最小化" aria-label="最小化">
-      <svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg>
-    </button>
-    <button class="desktop-window-btn" data-window-action="maximize" title="全屏" aria-label="全屏">
-      <svg class="icon-maximize" viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" rx="1.5"/></svg>
-      <svg class="icon-restore" viewBox="0 0 16 16" style="display:none"><path d="M5 3.5h7.5v7.5"/><rect x="3.5" y="5.5" width="7" height="7" rx="1.3"/></svg>
-    </button>
-    <button class="desktop-window-btn close" data-window-action="close" title="关闭" aria-label="关闭">
-      <svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
-    </button>
   </div>
 </div>
 <div id="fullscreen-diy-zone" aria-hidden="true">
@@ -2420,11 +2430,16 @@ html.control-glass-svg-ok #visual-guide-btn:hover{
       <div id="quality-control" class="quality-control">
         <button id="quality-btn" class="ctrl-btn quality-pill" onclick="toggleQualityPanel(event)" title="音质"><span id="quality-btn-label">臻音</span></button>
         <div class="quality-popover" onclick="event.stopPropagation()">
-          <button class="quality-option svip-only" data-quality="jymaster" data-svip="1" onclick="setPlaybackQuality('jymaster')"><span>超清母带</span><small>SVIP / 最高规格</small></button>
-          <button class="quality-option" data-quality="hires" onclick="setPlaybackQuality('hires')"><span>高清臻音</span><small>默认 / 细节优先</small></button>
-          <button class="quality-option" data-quality="lossless" onclick="setPlaybackQuality('lossless')"><span>无损 SQ</span><small>FLAC 优先</small></button>
-          <button class="quality-option" data-quality="exhigh" onclick="setPlaybackQuality('exhigh')"><span>极高 HQ</span><small>320kbps</small></button>
-          <button class="quality-option" data-quality="standard" onclick="setPlaybackQuality('standard')"><span>标准</span><small>128kbps</small></button>
+          <button class="quality-option svip-only" data-provider="netease" data-quality="jymaster" data-svip="1" onclick="setPlaybackQuality('jymaster')"><span>超清母带</span><small>网易云 SVIP</small></button>
+          <button class="quality-option" data-provider="netease" data-quality="hires" onclick="setPlaybackQuality('hires')"><span>高清臻音</span><small>网易云默认</small></button>
+          <button class="quality-option" data-provider="netease" data-quality="lossless" onclick="setPlaybackQuality('lossless')"><span>无损 SQ</span><small>FLAC 优先</small></button>
+          <button class="quality-option" data-provider="netease" data-quality="exhigh" onclick="setPlaybackQuality('exhigh')"><span>极高 HQ</span><small>320kbps</small></button>
+          <button class="quality-option" data-provider="netease" data-quality="standard" onclick="setPlaybackQuality('standard')"><span>标准</span><small>128kbps</small></button>
+          <button class="quality-option" data-provider="qq" data-quality="hires" onclick="setPlaybackQuality('hires')"><span>Hi-Res</span><small>QQ 高解析</small></button>
+          <button class="quality-option" data-provider="qq" data-quality="lossless" onclick="setPlaybackQuality('lossless')"><span>无损 SQ</span><small>FLAC 优先</small></button>
+          <button class="quality-option" data-provider="qq" data-quality="exhigh" onclick="setPlaybackQuality('exhigh')"><span>极高 HQ</span><small>320kbps</small></button>
+          <button class="quality-option" data-provider="qq" data-quality="standard" onclick="setPlaybackQuality('standard')"><span>标准</span><small>128kbps</small></button>
+          <button class="quality-option" data-provider="qq" data-quality="aac" onclick="setPlaybackQuality('aac')"><span>AAC</span><small>M4A 兜底</small></button>
         </div>
       </div>
       <button id="heart-btn" class="ctrl-btn" onclick="toggleLikeCurrent()" title="红心喜欢"><svg class="heart-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.45c-.32 0-.62-.12-.86-.34l-1.23-1.12C5.54 16.03 2.25 13.05 2.25 8.9 2.25 5.48 4.88 2.9 8.28 2.9c1.7 0 3.35.72 4.52 1.96C13.97 3.62 15.62 2.9 17.32 2.9c3.4 0 6.03 2.58 6.03 6 0 4.15-3.29 7.13-7.66 11.09l-1.23 1.12c-.24.22-.54.34-.86.34z"/></svg></button>
@@ -2717,6 +2732,8 @@ var CUSTOM_LYRIC_PREF_STORE_KEY = 'mineradio-custom-lyric-prefs-v1';
 var LYRIC_LAYOUT_STORE_KEY = 'mineradio-lyric-layout-v1';
 var VISUAL_PRESET_SCHEMA = 'skull-preset-v2';
 var PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-v1';
+var NETEASE_PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-netease-v1';
+var QQ_PLAYBACK_QUALITY_STORE_KEY = 'mineradio-playback-quality-qq-v1';
 var UPLOAD_TIP_STORE_KEY = 'mineradio-upload-tip-seen';
 var DIY_MODE_STORE_KEY = 'mineradio-diy-player-mode-v1';
 var PLAYLIST_PANEL_PIN_STORE_KEY = 'mineradio-playlist-panel-pinned-v1';
@@ -2746,7 +2763,8 @@ var customLyricMap = readCustomLyricMap();
 var customLyricPrefs = readCustomLyricPrefs();
 var localBeatMapCache = readLocalBeatMapCache();
 var localBeatMapPrefs = readLocalBeatPrefs();
-var playbackQuality = readPlaybackQualityPreference();
+var neteasePlaybackQuality = readPlaybackQualityPreference('netease');
+var qqPlaybackQuality = readPlaybackQualityPreference('qq');
 var qqPlaybackQualityCeiling = '';
 var coverCropState = null, coverCropBound = false;
 var currentLocalSong = null;
@@ -2825,7 +2843,7 @@ var updatePreviewState = {
   installerOpened: false,
   cached: false,
   currentVersion: '0.9.11',
-  version: '1.1.0',
+  version: '1.1.2',
   configured: false,
   preview: false,
   updateAvailable: false,
@@ -3727,9 +3745,9 @@ var RENDER_VISIBLE_VSYNC = true;
 var RENDER_ACTIVE_FPS = 0;
 var RENDER_LARGE_FPS = 0;
 var RENDER_HUGE_FPS = 0;
-var RENDER_INTERACTION_FPS = 0;
-var RENDER_INTERACTION_LARGE_FPS = 0;
-var RENDER_INTERACTION_HUGE_FPS = 0;
+var RENDER_INTERACTION_FPS = 60;
+var RENDER_INTERACTION_LARGE_FPS = 60;
+var RENDER_INTERACTION_HUGE_FPS = 54;
 var RENDER_INTERACTION_HOLD_MS = 900;
 var renderInteractionBoostUntil = 0;
 var renderInteractionReason = '';
@@ -10309,7 +10327,8 @@ function normalizeBeatPrefetchState(state) {
 async function fetchBeatPrefetchAudioUrl(song) {
   if (!song) return null;
   var isQQ = songProviderKey(song) === 'qq';
-  var requestedQuality = normalizePlaybackQuality(playbackQuality);
+  var requestedQuality = normalizePlaybackQuality(playbackQualityForSong(song));
+  requestedQuality = playbackQualityForProvider(isQQ ? 'qq' : 'netease', requestedQuality);
   if (!isQQ && requestedQuality === 'jymaster' && !hasProviderSvip('netease', loginStatus)) requestedQuality = 'hires';
   if (isQQ && qqPlaybackQualityCeiling && (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless')) requestedQuality = qqPlaybackQualityCeiling;
   var qualityParam = '&quality=' + encodeURIComponent(requestedQuality);
@@ -15105,6 +15124,7 @@ function normalizePlaybackQuality(value) {
   if (value === 'lossless' || value === 'flac' || value === 'sq') return 'lossless';
   if (value === 'exhigh' || value === 'high' || value === '320k' || value === 'hq') return 'exhigh';
   if (value === 'standard' || value === 'normal' || value === 'std') return 'standard';
+  if (value === 'aac' || value === 'm4a') return 'aac';
   return 'hires';
 }
 function playbackQualityLabel(value) {
@@ -15114,6 +15134,7 @@ function playbackQualityLabel(value) {
   if (value === 'lossless') return '无损';
   if (value === 'exhigh') return '极高';
   if (value === 'standard') return '标准';
+  if (value === 'aac') return 'AAC';
   return '高清臻音';
 }
 function playbackQualityShortLabel(value) {
@@ -15123,6 +15144,7 @@ function playbackQualityShortLabel(value) {
   if (value === 'lossless') return 'SQ';
   if (value === 'exhigh') return 'HQ';
   if (value === 'standard') return 'STD';
+  if (value === 'aac') return 'AAC';
   return '臻音';
 }
 function playbackQualityRank(value) {
@@ -15132,10 +15154,17 @@ function playbackQualityRank(value) {
   if (value === 'lossless') return 3;
   if (value === 'exhigh') return 2;
   if (value === 'standard') return 1;
+  if (value === 'aac') return 0;
   return 4;
 }
 function playbackQualityWasDowngraded(requested, resolved) {
+  if (!resolved) return false;
   return playbackQualityRank(resolved) < playbackQualityRank(requested);
+}
+function playbackQualityForProvider(provider, quality) {
+  quality = normalizePlaybackQuality(quality);
+  if (provider === 'qq' && quality === 'jymaster') return 'hires';
+  return quality;
 }
 function playbackBitrateLabel(br) {
   br = Number(br) || 0;
@@ -15145,51 +15174,75 @@ function playbackBitrateLabel(br) {
 }
 function playbackResolvedQualityText(data) {
   data = data || {};
-  var label = playbackQualityLabel(data.level || data.quality || playbackQuality);
+  var label = playbackQualityLabel(data.level || data.quality || currentPlaybackQualityPreference(currentQualityProvider()));
   var br = playbackBitrateLabel(data.br);
   return br ? (label + ' · ' + br) : label;
 }
-function readPlaybackQualityPreference() {
+function readPlaybackQualityPreference(provider) {
+  provider = provider === 'qq' ? 'qq' : 'netease';
+  var key = provider === 'qq' ? QQ_PLAYBACK_QUALITY_STORE_KEY : NETEASE_PLAYBACK_QUALITY_STORE_KEY;
+  var fallback = provider === 'qq' ? 'hires' : 'hires';
   try {
-    return normalizePlaybackQuality(localStorage.getItem(PLAYBACK_QUALITY_STORE_KEY) || 'hires');
+    var value = localStorage.getItem(key);
+    if (!value && provider === 'netease') value = localStorage.getItem(PLAYBACK_QUALITY_STORE_KEY);
+    return normalizePlaybackQuality(value || fallback);
   } catch (e) {
-    return 'hires';
+    return fallback;
   }
 }
-function savePlaybackQualityPreference() {
-  try { localStorage.setItem(PLAYBACK_QUALITY_STORE_KEY, playbackQuality); } catch (e) {}
+function playbackQualityForSong(song) {
+  return songProviderKey(song) === 'qq' ? qqPlaybackQuality : neteasePlaybackQuality;
+}
+function currentQualityProvider() {
+  if (currentIdx >= 0 && playQueue[currentIdx]) return songProviderKey(playQueue[currentIdx]) === 'qq' ? 'qq' : 'netease';
+  if (activeAccountProvider === 'qq') return 'qq';
+  return 'netease';
+}
+function currentPlaybackQualityPreference(provider) {
+  return provider === 'qq' ? qqPlaybackQuality : neteasePlaybackQuality;
+}
+function savePlaybackQualityPreference(provider) {
+  provider = provider === 'qq' ? 'qq' : 'netease';
+  var key = provider === 'qq' ? QQ_PLAYBACK_QUALITY_STORE_KEY : NETEASE_PLAYBACK_QUALITY_STORE_KEY;
+  var value = currentPlaybackQualityPreference(provider);
+  try { localStorage.setItem(key, value); } catch (e) {}
 }
 function updatePlaybackQualityUi() {
   var label = document.getElementById('quality-btn-label');
   var btn = document.getElementById('quality-btn');
+  var provider = currentQualityProvider();
   var canUseSvip = hasProviderSvip('netease', loginStatus);
-  var displayQuality = playbackQuality === 'jymaster' && !canUseSvip ? 'hires' : playbackQuality;
+  var selectedQuality = currentPlaybackQualityPreference(provider);
+  var displayQuality = provider === 'netease' && selectedQuality === 'jymaster' && !canUseSvip ? 'hires' : selectedQuality;
   if (label) label.textContent = playbackQualityShortLabel(displayQuality);
-  if (btn) btn.title = playbackQuality === 'jymaster' && !canUseSvip
-    ? '音质: ' + playbackQualityLabel(displayQuality) + ' · 超清母带需网易云 SVIP'
-    : '音质: ' + playbackQualityLabel(displayQuality);
+  if (btn) btn.title = (provider === 'qq' ? 'QQ 音质: ' : '网易云音质: ') + playbackQualityLabel(displayQuality);
   document.querySelectorAll('.quality-option').forEach(function(option){
+    var optionProvider = option.dataset.provider || 'both';
+    var visible = optionProvider === 'both' || optionProvider === provider;
     var q = normalizePlaybackQuality(option.dataset.quality);
-    var locked = option.dataset.svip === '1' && !canUseSvip;
+    var locked = provider === 'netease' && option.dataset.svip === '1' && !canUseSvip;
+    option.style.display = visible ? '' : 'none';
     option.classList.toggle('active', q === displayQuality);
     option.classList.toggle('locked', locked);
     option.disabled = locked;
-    option.title = locked ? '需要网易云 SVIP 账号' : playbackQualityLabel(q);
+    option.title = locked ? '需要网易云 SVIP 账号' : ((provider === 'qq' ? 'QQ 音质: ' : '网易云音质: ') + playbackQualityLabel(q));
   });
 }
 function setPlaybackQuality(value) {
+  var provider = currentQualityProvider();
   var next = normalizePlaybackQuality(value);
-  if (next === 'jymaster' && !hasProviderSvip('netease', loginStatus)) {
+  if (provider === 'netease' && next === 'jymaster' && !hasProviderSvip('netease', loginStatus)) {
     showToast(hasPlatformLogin('netease') ? '超清母带需要网易云 SVIP' : '登录网易云 SVIP 后可用超清母带');
     if (!hasPlatformLogin('netease')) openProviderLogin('netease');
     return;
   }
-  playbackQuality = next;
-  savePlaybackQualityPreference();
+  if (provider === 'qq') qqPlaybackQuality = next;
+  else neteasePlaybackQuality = next;
+  savePlaybackQualityPreference(provider);
   updatePlaybackQualityUi();
   var wrap = document.getElementById('quality-control');
   if (wrap) wrap.classList.remove('open');
-  applyPlaybackQualityToCurrentTrack(next);
+  applyPlaybackQualityToCurrentTrack(next, provider);
 }
 function canReloadCurrentTrackForQuality() {
   if (currentIdx < 0 || currentIdx >= playQueue.length) return false;
@@ -15198,16 +15251,22 @@ function canReloadCurrentTrackForQuality() {
   if (!song || song.type === 'local' || song.source === 'local') return false;
   return songProviderKey(song) === 'netease' || songProviderKey(song) === 'qq';
 }
-function applyPlaybackQualityToCurrentTrack(nextQuality) {
-  var label = playbackQualityLabel(nextQuality || playbackQuality);
+function applyPlaybackQualityToCurrentTrack(nextQuality, provider) {
+  provider = provider || currentQualityProvider();
+  var label = playbackQualityLabel(nextQuality || currentPlaybackQualityPreference(provider));
   if (!canReloadCurrentTrackForQuality()) {
-    showToast('音质偏好: ' + label + ' · 下次播放生效');
+    showToast((provider === 'qq' ? 'QQ 音质偏好: ' : '网易云音质偏好: ') + label + ' · 下次播放生效');
+    return;
+  }
+  var currentProvider = currentQualityProvider();
+  if (provider !== currentProvider) {
+    showToast((provider === 'qq' ? 'QQ 音质偏好: ' : '网易云音质偏好: ') + label + ' · 下次播放生效');
     return;
   }
   var resumeAt = audio && isFinite(audio.currentTime) ? audio.currentTime : 0;
   showToast('正在切换音质: ' + label);
   Promise.resolve(playQueueAt(currentIdx, {
-    qualityOverride: nextQuality || playbackQuality,
+    qualityOverride: nextQuality || currentPlaybackQualityPreference(provider),
     qualitySwitch: true,
     resumeAt: resumeAt,
     preserveHomeState: true,
@@ -18157,7 +18216,7 @@ function playbackRestrictionMessage(song, data) {
   return message;
 }
 function qqPlaybackRetryQualities(requestedQuality, resolvedLevel) {
-  requestedQuality = normalizePlaybackQuality(requestedQuality || playbackQuality);
+  requestedQuality = normalizePlaybackQuality(requestedQuality || qqPlaybackQuality);
   resolvedLevel = String(resolvedLevel || '').toLowerCase();
   var pool = [];
   if (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless' || resolvedLevel === 'hires' || resolvedLevel === 'lossless') {
@@ -18208,6 +18267,24 @@ function normalizeMatchText(text) {
     .replace(/[（(【\[].*?[）)】\]]/g, '')
     .replace(/[\s·・\-—_.,，。:：'"“”‘’/\\|]+/g, '');
 }
+function normalizeMatchTextKeepVersion(text) {
+  return String(text || '').toLowerCase()
+    .replace(/[\s·・\-—_.,，。:：'"“”‘’/\\|]+/g, '');
+}
+function playbackVersionPenalty(song) {
+  var raw = normalizeMatchTextKeepVersion(((song && song.name) || '') + ' ' + ((song && song.album) || ''));
+  var penalty = 0;
+  if (/(live|现场|演唱会|concert|巡演)/i.test(raw)) penalty += 46;
+  if (/(伴奏|instrumental|karaoke|纯音乐)/i.test(raw)) penalty += 58;
+  if (/(remix|混音|dj版|加速|降调|升调|nightcore| slowed|spedup)/i.test(raw)) penalty += 54;
+  if (/(cover|翻唱|男声版|女声版|片段|剪辑|demo|试听)/i.test(raw)) penalty += 50;
+  return penalty;
+}
+function playbackDurationMs(song) {
+  var raw = Number(song && (song.duration || song.dt || song.interval || 0)) || 0;
+  if (raw > 0 && raw < 10000) raw *= 1000;
+  return raw > 0 ? raw : 0;
+}
 function artistNameParts(song) {
   var parts = [];
   if (song && Array.isArray(song.artists)) {
@@ -18228,6 +18305,48 @@ function isSameTitleArtist(source, candidate) {
   if (!a.length || !b.length) return false;
   return a.some(function(name){ return b.indexOf(name) >= 0; });
 }
+function scoreAlternatePlaybackCandidate(source, candidate, sourceIndex) {
+  if (!source || !candidate) return -Infinity;
+  var srcTitle = normalizeMatchText(source.name || source.title);
+  var candTitle = normalizeMatchText(candidate.name || candidate.title);
+  if (!srcTitle || !candTitle) return -Infinity;
+  var score = 0;
+  if (candTitle === srcTitle) score += 92;
+  else if (candTitle.indexOf(srcTitle) >= 0 || srcTitle.indexOf(candTitle) >= 0) score += 44;
+  else return -Infinity;
+
+  var sourceArtists = artistNameParts(source);
+  var candidateArtists = artistNameParts(candidate);
+  var artistHit = sourceArtists.some(function(name){
+    return candidateArtists.indexOf(name) >= 0 || candidateArtists.some(function(other){ return other.indexOf(name) >= 0 || name.indexOf(other) >= 0; });
+  });
+  if (artistHit) score += 86;
+  else score -= 110;
+
+  var srcAlbum = normalizeMatchText(source.album);
+  var candAlbum = normalizeMatchText(candidate.album);
+  if (srcAlbum && candAlbum) {
+    if (srcAlbum === candAlbum) score += 22;
+    else if (srcAlbum.indexOf(candAlbum) >= 0 || candAlbum.indexOf(srcAlbum) >= 0) score += 10;
+  }
+
+  var srcDuration = playbackDurationMs(source);
+  var candDuration = playbackDurationMs(candidate);
+  if (srcDuration && candDuration) {
+    var diff = Math.abs(srcDuration - candDuration);
+    if (diff <= 2500) score += 28;
+    else if (diff <= 8000) score += 12;
+    else if (diff <= 18000) score -= 24;
+    else score -= 80;
+  }
+
+  var sourceVersionPenalty = playbackVersionPenalty(source);
+  var candidateVersionPenalty = playbackVersionPenalty(candidate);
+  score -= Math.max(0, candidateVersionPenalty - sourceVersionPenalty);
+  if (candidate && candidate.playable === false) score -= 14;
+  score -= (sourceIndex || 0) * 1.2;
+  return score;
+}
 function alternatePlaybackProvider(song) {
   return songProviderKey(song) === 'qq' ? 'netease' : 'qq';
 }
@@ -18241,14 +18360,21 @@ async function searchAlternatePlatformSong(song) {
     : '/api/search?keywords=' + encodeURIComponent(query) + '&limit=12';
   var data = await apiJson(url);
   var list = data && (data.songs || data.result || []);
+  var best = null;
+  var bestScore = -Infinity;
   for (var i = 0; i < list.length; i++) {
-    if (isSameTitleArtist(song, list[i])) return cloneSong(list[i]);
+    var score = scoreAlternatePlaybackCandidate(song, list[i], i);
+    if (score > bestScore) {
+      best = list[i];
+      bestScore = score;
+    }
   }
-  return null;
+  return best && bestScore >= 125 ? cloneSong(best) : null;
 }
 function markQueueItemPlaybackFailed(idx) {
   if (playQueue[idx]) playQueue[idx]._lastPlaybackFailAt = Date.now();
 }
+var queueFailureSkipLock = { token: 0, idx: -1, until: 0 };
 function nextUnblockedQueueIndex(idx) {
   var now = Date.now();
   for (var step = 1; step < playQueue.length; step++) {
@@ -18261,6 +18387,9 @@ function nextUnblockedQueueIndex(idx) {
 function skipFailedQueueItem(idx, token, message) {
   hideLoading();
   if (token !== trackSwitchToken) return;
+  var now = Date.now();
+  if (queueFailureSkipLock.token === token && queueFailureSkipLock.idx === idx && queueFailureSkipLock.until > now) return;
+  queueFailureSkipLock = { token: token, idx: idx, until: now + 1600 };
   markQueueItemPlaybackFailed(idx);
   if (playQueue.length <= 1) {
     showSourceFallbackNotice('没有可跳过的下一首', message || '当前歌曲不可播放，队列里没有其他歌曲。');
@@ -18272,7 +18401,6 @@ function skipFailedQueueItem(idx, token, message) {
     return;
   }
   showSourceFallbackNotice('已跳过受限歌曲', message || '未找到同名同歌手的另一个平台版本，正在播放下一首。');
-  currentIdx = nextIdx;
   playQueueAt(nextIdx, { fallbackDepth: 0 });
 }
 async function tryAutoPlaybackFallback(song, data, idx, token, opts) {
@@ -18423,6 +18551,7 @@ async function playQueueAt(idx, opts) {
   currentLocalSong = null;
   safePlaybackStep('cover-button', updateCustomCoverButton);
   safePlaybackStep('like-buttons', function(){ updateLikeButtons(song); });
+  safePlaybackStep('quality-ui', updatePlaybackQualityUi);
   safePlaybackStep('like-status', function(){ syncLikeStatusForSong(song); });
   safePlaybackStep('cinema-track-profile', function(){ resetCinemaTrackProfile(song); });
   safePlaybackStep('empty-home', function(){ if (!opts.preserveHomeState) updateEmptyHomeVisibility(); });
@@ -18462,7 +18591,8 @@ async function playQueueAt(idx, opts) {
   try {
     markPlayPhase('source-url');
     var isQQPlayback = songProviderKey(song) === 'qq';
-    var requestedQuality = normalizePlaybackQuality(opts.qualityOverride || playbackQuality);
+    var requestedQuality = normalizePlaybackQuality(opts.qualityOverride || playbackQualityForSong(song));
+    requestedQuality = playbackQualityForProvider(isQQPlayback ? 'qq' : 'netease', requestedQuality);
     if (!isQQPlayback && requestedQuality === 'jymaster' && !hasProviderSvip('netease', loginStatus)) requestedQuality = 'hires';
     if (isQQPlayback && qqPlaybackQualityCeiling && (requestedQuality === 'jymaster' || requestedQuality === 'hires' || requestedQuality === 'lossless')) {
       requestedQuality = qqPlaybackQualityCeiling;
@@ -18481,12 +18611,18 @@ async function playQueueAt(idx, opts) {
     var resolvedQualityText = playbackResolvedQualityText(data);
     if (!isQQPlayback && playbackQualityWasDowngraded(requestedQuality, data.level)) {
       showSourceFallbackNotice('网易云音质自动降级', '请求 ' + playbackQualityLabel(requestedQuality) + '，实际播放 ' + resolvedQualityText + '。');
+    } else if (isQQPlayback && (data.downgraded || playbackQualityWasDowngraded(requestedQuality, data.level))) {
+      showSourceFallbackNotice('QQ 音质自动降级', '请求 ' + playbackQualityLabel(requestedQuality) + '，实际播放 ' + resolvedQualityText + '。');
     } else if (opts.qualitySwitch) {
       showSourceFallbackNotice('音质已切换', '实际播放: ' + resolvedQualityText + '。');
     }
     if (data.trial) {
       var txt;
-      if (data.loggedIn && data.vipLevel === 'svip') txt = '此歌曲需要单曲、专辑购买或更高权限';
+      if (isQQPlayback) {
+        if (data.loggedIn && data.playbackKeyReady === false) txt = 'QQ 音乐播放授权不完整 · 当前仅播放试听片段';
+        else if (data.loggedIn) txt = 'QQ 音乐当前仅返回试听片段';
+        else txt = '当前未登录 QQ 音乐 · 仅播放试听片段';
+      } else if (data.loggedIn && data.vipLevel === 'svip') txt = '此歌曲需要单曲、专辑购买或更高权限';
       else if (data.loggedIn && data.vipLevel === 'vip') txt = '此歌曲需要 SVIP 或购买 · 当前仅播放试听片段';
       else if (data.loggedIn) txt = '此歌曲需 VIP · 当前仅播放试听片段';
       else txt = '当前未登录 · 仅播放试听片段';
@@ -18494,7 +18630,7 @@ async function playQueueAt(idx, opts) {
       var trialLoginBtn = document.getElementById('trial-login-btn');
       if (trialLoginBtn) {
         trialLoginBtn.style.display = data.loggedIn ? 'none' : '';
-        trialLoginBtn.onclick = function(){ openProviderLogin('netease'); };
+        trialLoginBtn.onclick = function(){ openProviderLogin(isQQPlayback ? 'qq' : 'netease'); };
       }
       document.getElementById('trial-banner').classList.add('show');
     }
@@ -22798,14 +22934,14 @@ function syncUpdatePreviewStateClass() {
   var packageLabel = updatePackageLabel();
   if (label) {
     if (isDownloading) label.textContent = (isPatch ? '快速补丁 ' : '正在下载 ') + Math.round(updatePreviewState.progress) + '%';
-    else if (isOpening) label.textContent = '正在打开 ' + packageLabel;
+    else if (isOpening) label.textContent = '正在安装更新';
     else if (isError && updatePreviewState.mode === 'patch' && updatePreviewState.downloadUrl) label.textContent = fullUpdatePackageLabel();
     else if (isError) label.textContent = updatePreviewState.mode === 'installer' ? '重试下载' : '重试更新';
     else if (isReady && isPatch && updatePreviewState.restartRequired) label.textContent = '重启生效';
     else if (isReady && isPatch) label.textContent = '补丁已应用';
-    else if (isReady && updatePreviewState.installerOpened) label.textContent = packageLabel + '已打开';
-    else if (isReady && updatePreviewState.installerPath) label.textContent = updatePreviewState.cached ? '打开已下载的 ' + packageLabel : '打开 ' + packageLabel;
-    else if (isReady) label.textContent = updatePreviewState.configured ? '打开 ' + packageLabel : '预览完成';
+    else if (isReady && updatePreviewState.installerOpened) label.textContent = '正在重启';
+    else if (isReady && updatePreviewState.installerPath) label.textContent = '安装并重启';
+    else if (isReady) label.textContent = updatePreviewState.configured ? '安装并重启' : '预览完成';
     else if (canOpenRelease) label.textContent = '查看 Release';
     else label.textContent = updatePreviewState.patchAvailable ? '安装快速补丁' : (canDownloadUpdate ? fullUpdatePackageLabel() : '立即更新');
   }
@@ -22815,7 +22951,7 @@ function syncUpdatePreviewStateClass() {
     if (isDownloading) foot.textContent = (updatePreviewState.message || (isPatch ? '正在下载快速补丁' : '正在下载 ' + packageLabel)) + (updateProgressDetailText() ? ' · ' + updateProgressDetailText() : '');
     else if (isError) foot.textContent = '下载失败：' + (updatePreviewState.errorReason || updatePreviewState.errorDetail || updatePreviewState.message || '请稍后重试') + (updatePreviewState.failedAttempts && updatePreviewState.failedAttempts.length ? ' · 已尝试 ' + updatePreviewState.failedAttempts.length + ' 条线路' : '');
     else if (isReady && isPatch) foot.textContent = updatePreviewState.restartRequired ? '快速补丁已应用，重启 Mineradio 后生效。' : '快速补丁已应用。';
-    else if (isReady) foot.textContent = updatePreviewState.cached ? '已复用上次校验通过的 ' + packageLabel + '，不会重复下载。' : packageLabel + '已准备好，点击按钮后再打开。';
+    else if (isReady) foot.textContent = updatePreviewState.cached ? '已复用上次校验通过的 ' + packageLabel + '，点击后会自动安装并重启。' : packageLabel + '已准备好，点击后会自动退出、安装并重启。';
     else if (canOpenRelease) foot.textContent = '这个版本没有可自动下载的 Mac 更新包，可打开 Release 页面手动查看。';
     else if (updatePreviewState.patchAvailable) foot.textContent = '优先使用轻量补丁，只更新缺失或变更的资源文件；不适用时可下载完整更新包。';
     else foot.textContent = updatePreviewState.updateAvailable ? '没有可用快速补丁时会下载完整更新包。' : '当前版本已是最新。';
@@ -22883,7 +23019,7 @@ function animateUpdatePanelContents() {
 async function startRealUpdateDownload() {
   if (updatePreviewState.status === 'downloading' || updatePreviewState.status === 'opening') return;
   if (updatePreviewState.status === 'ready' && updatePreviewState.installerPath) {
-    openDownloadedUpdateInstaller(updatePreviewState.installerPath);
+    installDownloadedUpdate(updatePreviewState.installerPath);
     return;
   }
   if (updatePreviewState.timer) clearInterval(updatePreviewState.timer);
@@ -23076,27 +23212,36 @@ async function restartForAppliedPatch() {
   showToast('请手动重启 Mineradio 让补丁生效');
 }
 
-async function openDownloadedUpdateInstaller(filePath) {
+async function installDownloadedUpdate(filePath) {
   if (!filePath) return;
   if (updatePreviewState.installerOpened) return;
   updatePreviewState.status = 'opening';
   syncUpdatePreviewStateClass();
   try {
-    if (window.desktopWindow && window.desktopWindow.openUpdateInstaller) {
-      var result = await window.desktopWindow.openUpdateInstaller(filePath);
-      if (!result || result.ok === false) throw new Error((result && result.error) || 'OPEN_UPDATE_FAILED');
+    if (window.desktopWindow && window.desktopWindow.installDownloadedUpdate) {
+      var result = await window.desktopWindow.installDownloadedUpdate(filePath);
+      if (!result || result.ok === false) throw new Error((result && result.error) || 'INSTALL_UPDATE_FAILED');
       updatePreviewState.installerOpened = true;
       updatePreviewState.status = 'ready';
       syncUpdatePreviewStateClass();
-      showToast(updatePackageLabel() + '已打开');
+      showToast('正在安装更新，Mineradio 将自动重启');
       return;
     }
     throw new Error('DESKTOP_BRIDGE_MISSING');
   } catch (e) {
     updatePreviewState.status = 'ready';
     syncUpdatePreviewStateClass();
+    if (window.desktopWindow && window.desktopWindow.openUpdateInstaller) {
+      try {
+        var openResult = await window.desktopWindow.openUpdateInstaller(filePath);
+        if (openResult && openResult.ok !== false) {
+          showToast('自动安装失败，已打开安装包，可手动替换');
+          return;
+        }
+      } catch (_) {}
+    }
     if (updatePreviewState.releaseUrl) window.open(updatePreviewState.releaseUrl, '_blank');
-    showToast('无法自动打开 ' + updatePackageLabel() + '，已尝试打开更新页面');
+    showToast('自动安装失败，已尝试打开更新页面');
   }
 }
 
@@ -24749,9 +24894,21 @@ function handleVisualGuideSurfaceClick(e) {
 function loadScriptOnce(src) {
   return new Promise(function(resolve, reject){
     var hit = document.querySelector('script[src="' + src + '"]');
-    if (hit) { resolve(); return; }
+    if (hit && hit.dataset.loaded === '1') { resolve(); return; }
+    if (hit && hit.dataset.loading === '1') {
+      hit.addEventListener('load', resolve, { once: true });
+      hit.addEventListener('error', reject, { once: true });
+      return;
+    }
+    if (hit) hit.remove();
     var sc = document.createElement('script'); sc.src = src; sc.async = true;
-    sc.onload = resolve; sc.onerror = reject;
+    sc.dataset.loading = '1';
+    sc.onload = function(){
+      sc.dataset.loaded = '1';
+      sc.dataset.loading = '0';
+      resolve();
+    };
+    sc.onerror = reject;
     document.head.appendChild(sc);
   });
 }
@@ -24769,6 +24926,8 @@ function stopHeadTracking(){}      // stub
 
 var gestureVideo = null, gestureCamera = null, gestureHands = null;
 var gestureActive = false;
+var gestureResultCount = 0;
+var gestureFrameWatchTimer = null;
 // 21 个关键点的平滑缓存 (EMA): [{x,y}, ...]
 var handLmSmooth = null;
 var handLmLastSeen = 0;
@@ -24784,6 +24943,25 @@ var PARTICLE_POINTER_SPIN_Y = 0.0034;
 var PARTICLE_HAND_SPIN_X = 4.15;
 var PARTICLE_HAND_SPIN_Y = 4.30;
 var PARTICLE_SPIN_MAX = 6.2;
+
+function clearGestureFrameWatch() {
+  if (gestureFrameWatchTimer) {
+    clearTimeout(gestureFrameWatchTimer);
+    gestureFrameWatchTimer = null;
+  }
+}
+
+function cleanupGestureResources() {
+  clearGestureFrameWatch();
+  try { if (gestureCamera && gestureCamera.stop) gestureCamera.stop(); } catch(e){}
+  try { if (gestureVideo && gestureVideo.srcObject) gestureVideo.srcObject.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+  try { if (gestureVideo) gestureVideo.remove(); } catch(e){}
+  gestureVideo = null;
+  gestureHands = null;
+  gestureCamera = null;
+  gestureActive = false;
+  gestureResultCount = 0;
+}
 
 function clampParticleSpinVelocity(v) {
   if (!isFinite(v)) return 0;
@@ -24851,13 +25029,19 @@ async function startGestureControl() {
     gestureHands.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.7 });
     gestureHands.onResults(function(res){
       if (!gestureActive) return;
+      gestureResultCount += 1;
       var lm = res.multiHandLandmarks && res.multiHandLandmarks[0];
       if (!lm) { onHandLost(); return; }
       processHandFrame(lm);
     });
     gestureCamera = new Camera(gestureVideo, { onFrame: async function(){ if (gestureHands) await gestureHands.send({ image: gestureVideo }); }, width: 480, height: 360 });
-    await gestureCamera.start();
     gestureActive = true;
+    await gestureCamera.start();
+    var stream = gestureVideo.srcObject;
+    var tracks = stream && stream.getVideoTracks ? stream.getVideoTracks() : [];
+    if (!tracks.length || tracks.every(function(t){ return t.readyState === 'ended'; })) {
+      throw new Error('NO_CAMERA_TRACK');
+    }
     // 准备 hand canvas
     handCanvas = document.getElementById('hand-canvas');
     handCanvasCtx = handCanvas.getContext('2d');
@@ -24865,9 +25049,19 @@ async function startGestureControl() {
     handCanvas.classList.add('show');
     showToast('手势已开启: 手掌推开 · 捏合旋转 · 握拳收束');
     showGestureHUD('待命', 0, '把手放进视野');
+    clearGestureFrameWatch();
+    gestureFrameWatchTimer = setTimeout(function(){
+      if (!gestureActive) return;
+      if (!gestureResultCount) {
+        showGestureHUD('等待画面', 0.08, '摄像头没有返回画面，请检查系统摄像头权限');
+      } else if (!handLmLastSeen) {
+        showGestureHUD('未识别到手', 0.08, '把手放进摄像头视野，保持正面光线');
+      }
+    }, 3500);
   } catch (e) {
     console.warn('Gesture failed:', e);
-    showToast('手势启动失败 (需要摄像头权限)');
+    cleanupGestureResources();
+    showToast('手势启动失败，请检查摄像头权限');
     fx.cam = 'off';
     document.querySelectorAll('#cam-seg button').forEach(function(b){ b.classList.toggle('active', b.dataset.cam === 'off'); });
   }
@@ -24875,11 +25069,7 @@ async function startGestureControl() {
 
 function stopGestureControl() {
   if (!gestureActive) return;
-  try { if (gestureCamera && gestureCamera.stop) gestureCamera.stop(); } catch(e){}
-  try { if (gestureVideo && gestureVideo.srcObject) gestureVideo.srcObject.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
-  try { if (gestureVideo) gestureVideo.remove(); } catch(e){}
-  gestureVideo = null; gestureHands = null; gestureCamera = null;
-  gestureActive = false;
+  cleanupGestureResources();
   pinchState.active = false;
   handLmSmooth = null;
   uniforms.uHandActive.value = 0;
@@ -26430,6 +26620,11 @@ function toggleFullscreen() {
   var restoreIcon = maxBtn && maxBtn.querySelector('.icon-restore');
   function applyState(state) {
     desktopWindowState = Object.assign(desktopWindowState, state || {});
+    if (desktopWindowState.platform) {
+      document.body.classList.toggle('desktop-platform-darwin', desktopWindowState.platform === 'darwin');
+      document.body.classList.toggle('desktop-platform-win32', desktopWindowState.platform === 'win32');
+      document.body.classList.toggle('desktop-platform-linux', desktopWindowState.platform === 'linux');
+    }
     var isMaximized = !!desktopWindowState.isMaximized;
     var isFullScreen = !!desktopWindowState.isFullScreen || !!desktopWindowState.isNativeFullScreen || !!desktopWindowState.isHtmlFullScreen || !!desktopWindowState.isWindowFullScreen || !!document.fullscreenElement;
     var wasFullScreen = desktopFullscreenActive;
@@ -26447,11 +26642,11 @@ function toggleFullscreen() {
     }
     syncCursorAutoHideMode();
     if (maxBtn) {
-      maxBtn.title = isFullScreen ? '退出全屏' : '全屏';
+      maxBtn.title = isFullScreen ? '退出全屏' : (isMaximized ? '还原' : '放大');
       maxBtn.setAttribute('aria-label', maxBtn.title);
     }
-    if (maxIcon) maxIcon.style.display = isFullScreen ? 'none' : '';
-    if (restoreIcon) restoreIcon.style.display = isFullScreen ? '' : 'none';
+    if (maxIcon) maxIcon.style.display = (isFullScreen || isMaximized) ? 'none' : '';
+    if (restoreIcon) restoreIcon.style.display = (isFullScreen || isMaximized) ? '' : 'none';
   }
 
   document.querySelectorAll('[data-window-action]').forEach(function(btn){
@@ -26460,7 +26655,7 @@ function toggleFullscreen() {
       e.stopPropagation();
       var action = btn.getAttribute('data-window-action');
       if (action === 'minimize') api.minimize();
-      if (action === 'maximize') toggleFullscreen();
+      if (action === 'maximize') api.toggleMaximize();
       if (action === 'close') api.close();
     });
   });

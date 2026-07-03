@@ -1,13 +1,15 @@
 {
   "name": "mineradio",
   "productName": "Mineradio",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Mineradio 的非官方 macOS 适配维护版，融合天气电台、歌词舞台、粒子视觉和 3D 歌单架。",
   "author": "Mineradio",
   "main": "desktop/main.js",
   "private": true,
   "scripts": {
     "start": "electron .",
+    "sign:electron:mac": "codesign --force --deep --sign - --options runtime --entitlements build/entitlements.mac.plist node_modules/electron/dist/Electron.app",
+    "dev:mac": "npm run sign:electron:mac && open -n node_modules/electron/dist/Electron.app --args \"$PWD\"",
     "build:mac": "electron-builder --mac dmg zip",
     "build:mac:all": "electron-builder --mac dmg zip --x64 --arm64",
     "build:mac:dir": "electron-builder --mac dir",
@@ -53,6 +55,9 @@
       "icon": "build/icon.png",
       "category": "public.app-category.music",
       "artifactName": "Mineradio-${version}-mac-${arch}.${ext}",
+      "extendInfo": {
+        "NSCameraUsageDescription": "Mineradio 使用摄像头识别手势，用于控制粒子视觉互动。"
+      },
       "target": [
         {
           "target": "dmg",

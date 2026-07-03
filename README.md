@@ -19,7 +19,7 @@ Mineradio macOS 是基于 [XxHuberrr/Mineradio](https://github.com/XxHuberrr/Min
 
 ## 当前状态
 
-当前版本：`1.1.1`
+当前版本：`1.1.2`
 
 macOS 适配状态：
 

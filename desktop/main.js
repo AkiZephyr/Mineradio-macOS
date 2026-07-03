@@ -25,10 +25,11 @@ let mainWindowStateTimer = null;
 const registeredGlobalHotkeys = new Map();
 
 const WINDOWED_ASPECT = 16 / 9;
-const WINDOWED_SCALE = 3 / 4;
+const WINDOWED_SCALE = 0.64;
+const DEFAULT_WINDOWED_WIDTH = 960;
 const WINDOWED_MARGIN = 32;
-const MIN_WINDOWED_WIDTH = 960;
-const MIN_WINDOWED_HEIGHT = 540;
+const MIN_WINDOWED_WIDTH = 860;
+const MIN_WINDOWED_HEIGHT = 484;
 const APP_NAME = 'Mineradio';
 const APP_USER_MODEL_ID = 'com.mineradio.desktop';
 const APP_ICON_ICO = path.join(__dirname, '..', 'build', 'icon.ico');
@@ -59,6 +60,41 @@ for (const [name, value] of CHROMIUM_PERFORMANCE_SWITCHES) {
   else app.commandLine.appendSwitch(name, value);
 }
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
+
+function isTrustedAppOrigin(value) {
+  try {
+    const parsed = new URL(value || '');
+    if (parsed.protocol === 'file:') return true;
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    return parsed.hostname === '127.0.0.1' || parsed.hostname === 'localhost';
+  } catch (_) {
+    return false;
+  }
+}
+
+function configureMediaPermissions() {
+  const allowLocalMedia = (webContents, permission, details = {}) => {
+    if (permission !== 'media') return false;
+    const candidates = [
+      details.requestingUrl,
+      details.embeddingOrigin,
+      details.securityOrigin,
+      webContents && !webContents.isDestroyed() ? webContents.getURL() : '',
+    ];
+    return candidates.some(isTrustedAppOrigin);
+  };
+
+  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
+    callback(allowLocalMedia(webContents, permission, details));
+  });
+
+  session.defaultSession.setPermissionCheckHandler((webContents, permission, requestingOrigin, details = {}) => {
+    return allowLocalMedia(webContents, permission, {
+      ...details,
+      requestingUrl: requestingOrigin || details.requestingUrl,
+    });
+  });
+}
 
 const QQ_LOGIN_COOKIE_PRIORITY = [
   'uin',
@@ -241,6 +277,7 @@ function getWindowState(win) {
     isMinimized: false,
     isVisible: false,
     isFocused: false,
+    platform: process.platform,
     isPrimaryDisplay: true,
     hasDisplayOnLeft: false,
     hasDisplayOnRight: false,
@@ -255,6 +292,7 @@ function getWindowState(win) {
     isMinimized: win.isMinimized(),
     isVisible: win.isVisible(),
     isFocused: win.isFocused(),
+    platform: process.platform,
     ...getDisplayState(win),
   };
 }
@@ -274,6 +312,155 @@ function focusMainWindow() {
 
 function getUpdateDownloadDir() {
   return path.join(app.getPath('userData'), 'updates');
+}
+
+function resolveUpdateDownloadPath(filePath) {
+  const target = path.resolve(String(filePath || ''));
+  const updateDir = path.resolve(getUpdateDownloadDir());
+  if (!target || !target.startsWith(updateDir + path.sep)) {
+    return { ok: false, error: 'INVALID_UPDATE_PATH' };
+  }
+  if (!fs.existsSync(target)) return { ok: false, error: 'UPDATE_FILE_MISSING' };
+  return { ok: true, path: target };
+}
+
+function getCurrentAppBundlePath() {
+  if (process.platform !== 'darwin') return '';
+  const marker = `.app${path.sep}`;
+  const exePath = process.execPath || '';
+  const markerIndex = exePath.indexOf(marker);
+  if (markerIndex < 0) return '';
+  return exePath.slice(0, markerIndex + 4);
+}
+
+function writeMacUpdateInstallerScript() {
+  const scriptPath = path.join(app.getPath('temp'), `mineradio-updater-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.zsh`);
+  const script = `#!/bin/zsh
+set -u
+
+SOURCE="$1"
+TARGET="$2"
+APP_NAME="$3"
+APP_PID="$4"
+LOG_FILE="$5"
+
+exec >> "$LOG_FILE" 2>&1
+echo "[MineradioUpdater] start $(date)"
+echo "[MineradioUpdater] source=$SOURCE"
+echo "[MineradioUpdater] target=$TARGET"
+
+fail() {
+  echo "[MineradioUpdater] failed: $1"
+  if [[ -f "$SOURCE" ]]; then
+    open "$SOURCE" >/dev/null 2>&1 || true
+  fi
+  exit 1
+}
+
+while kill -0 "$APP_PID" >/dev/null 2>&1; do
+  sleep 0.2
+done
+
+[[ -f "$SOURCE" ]] || fail "source missing"
+[[ "$TARGET" == *.app ]] || fail "target is not an app bundle"
+
+WORK_DIR="$(mktemp -d /tmp/mineradio-update.XXXXXX)" || fail "cannot create temp dir"
+MOUNT_DIR=""
+
+cleanup() {
+  if [[ -n "$MOUNT_DIR" ]]; then
+    hdiutil detach "$MOUNT_DIR" -quiet >/dev/null 2>&1 || true
+  fi
+  rm -rf "$WORK_DIR" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+LOWER_SOURCE="$(printf '%s' "$SOURCE" | tr '[:upper:]' '[:lower:]')"
+SOURCE_APP=""
+
+if [[ "$LOWER_SOURCE" == *.dmg ]]; then
+  ATTACH_OUTPUT="$(hdiutil attach -nobrowse -readonly "$SOURCE")" || fail "cannot mount dmg"
+  MOUNT_DIR="$(printf '%s\\n' "$ATTACH_OUTPUT" | awk -F '\\t' '/\\/Volumes\\// {print $NF; exit}')"
+  [[ -n "$MOUNT_DIR" && -d "$MOUNT_DIR" ]] || fail "mounted volume not found"
+  SOURCE_APP="$(find "$MOUNT_DIR" -maxdepth 2 -type d -name "$APP_NAME.app" -print -quit)"
+  [[ -n "$SOURCE_APP" ]] || SOURCE_APP="$(find "$MOUNT_DIR" -maxdepth 2 -type d -name "*.app" -print -quit)"
+elif [[ "$LOWER_SOURCE" == *.zip ]]; then
+  ditto -x -k "$SOURCE" "$WORK_DIR/unzip" || fail "cannot unzip update"
+  SOURCE_APP="$(find "$WORK_DIR/unzip" -maxdepth 4 -type d -name "$APP_NAME.app" -print -quit)"
+  [[ -n "$SOURCE_APP" ]] || SOURCE_APP="$(find "$WORK_DIR/unzip" -maxdepth 4 -type d -name "*.app" -print -quit)"
+else
+  fail "unsupported update package"
+fi
+
+[[ -n "$SOURCE_APP" && -d "$SOURCE_APP" ]] || fail "app bundle not found in update package"
+
+TARGET_PARENT="$(dirname "$TARGET")"
+mkdir -p "$TARGET_PARENT" || fail "cannot prepare target parent"
+
+BACKUP="$TARGET.old-$(date +%Y%m%d%H%M%S)"
+if [[ -d "$TARGET" ]]; then
+  mv "$TARGET" "$BACKUP" || fail "cannot move old app"
+fi
+
+if ! ditto "$SOURCE_APP" "$TARGET"; then
+  rm -rf "$TARGET" >/dev/null 2>&1 || true
+  if [[ -d "$BACKUP" ]]; then mv "$BACKUP" "$TARGET" >/dev/null 2>&1 || true; fi
+  fail "cannot copy new app"
+fi
+
+rm -rf "$BACKUP" >/dev/null 2>&1 || true
+xattr -dr com.apple.quarantine "$TARGET" >/dev/null 2>&1 || true
+echo "[MineradioUpdater] installed"
+open "$TARGET" >/dev/null 2>&1 || fail "cannot reopen app"
+echo "[MineradioUpdater] relaunched"
+exit 0
+`;
+  fs.writeFileSync(scriptPath, script, { mode: 0o755 });
+  return scriptPath;
+}
+
+function installDownloadedUpdate(filePath) {
+  const resolved = resolveUpdateDownloadPath(filePath);
+  if (!resolved.ok) return resolved;
+
+  if (process.platform !== 'darwin') {
+    return shell.openPath(resolved.path).then(error => (error ? { ok: false, error } : { ok: true, openedInstaller: true }));
+  }
+
+  const ext = path.extname(resolved.path).toLowerCase();
+  if (ext !== '.dmg' && ext !== '.zip') {
+    return { ok: false, error: 'UNSUPPORTED_MAC_UPDATE_PACKAGE' };
+  }
+
+  const appBundlePath = getCurrentAppBundlePath();
+  if (!appBundlePath || !fs.existsSync(appBundlePath)) {
+    return { ok: false, error: 'CURRENT_APP_BUNDLE_NOT_FOUND' };
+  }
+
+  const scriptPath = writeMacUpdateInstallerScript();
+  const logPath = path.join(getUpdateDownloadDir(), 'mineradio-updater.log');
+  fs.mkdirSync(path.dirname(logPath), { recursive: true });
+
+  const child = spawn('/bin/zsh', [
+    scriptPath,
+    resolved.path,
+    appBundlePath,
+    APP_NAME,
+    String(process.pid),
+    logPath,
+  ], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
+
+  closeOverlayWindows();
+  setTimeout(() => {
+    app.quit();
+    setTimeout(() => app.exit(0), 1200);
+  }, 120);
+
+  return { ok: true, installing: true, logPath };
 }
 
 function getBeatmapCacheDir() {
@@ -635,18 +822,11 @@ function getWindowedBounds(win) {
     ? screen.getDisplayMatching(win.getBounds())
     : screen.getPrimaryDisplay();
   const area = display.workArea;
-  const basis = display.bounds || area;
   const maxWidth = Math.max(640, area.width - WINDOWED_MARGIN);
   const maxHeight = Math.max(360, area.height - WINDOWED_MARGIN);
 
-  let width = Math.round(basis.width * WINDOWED_SCALE);
+  let width = Math.round(Math.min(DEFAULT_WINDOWED_WIDTH, area.width * WINDOWED_SCALE));
   let height = Math.round(width / WINDOWED_ASPECT);
-  const scaledHeight = Math.round(basis.height * WINDOWED_SCALE);
-
-  if (height > scaledHeight) {
-    height = scaledHeight;
-    width = Math.round(height * WINDOWED_ASPECT);
-  }
 
   if (width < MIN_WINDOWED_WIDTH && maxWidth >= MIN_WINDOWED_WIDTH && maxHeight >= MIN_WINDOWED_HEIGHT) {
     width = MIN_WINDOWED_WIDTH;
@@ -678,6 +858,17 @@ function applyWindowedBounds(win) {
   if (win.isMaximized()) win.unmaximize();
   win.setMinimumSize(MIN_WINDOWED_WIDTH, MIN_WINDOWED_HEIGHT);
   win.setBounds(getWindowedBounds(win), false);
+  sendWindowState(win);
+}
+
+function toggleMaximize(win) {
+  if (!win || win.isDestroyed()) return;
+  if (win.isFullScreen() || windowFullscreenActive) {
+    exitFullscreenToWindow(win);
+    return;
+  }
+  if (win.isMaximized()) win.unmaximize();
+  else win.maximize();
   sendWindowState(win);
 }
 
@@ -1131,7 +1322,7 @@ ipcMain.handle('desktop-window-minimize', (event) => {
 });
 
 ipcMain.handle('desktop-window-toggle-maximize', (event) => {
-  toggleFullscreen(getSenderWindow(event));
+  toggleMaximize(getSenderWindow(event));
 });
 
 ipcMain.handle('desktop-window-toggle-fullscreen', (event) => {
@@ -1207,16 +1398,20 @@ ipcMain.handle('qq-music-clear-login', async () => {
 
 ipcMain.handle('mineradio-open-update-installer', async (_event, filePath) => {
   try {
-    const target = path.resolve(String(filePath || ''));
-    const updateDir = path.resolve(getUpdateDownloadDir());
-    if (!target || !target.startsWith(updateDir + path.sep)) {
-      return { ok: false, error: 'INVALID_UPDATE_PATH' };
-    }
-    if (!fs.existsSync(target)) return { ok: false, error: 'UPDATE_FILE_MISSING' };
-    const error = await shell.openPath(target);
+    const resolved = resolveUpdateDownloadPath(filePath);
+    if (!resolved.ok) return resolved;
+    const error = await shell.openPath(resolved.path);
     return error ? { ok: false, error } : { ok: true };
   } catch (e) {
     return { ok: false, error: e.message || 'OPEN_UPDATE_FAILED' };
+  }
+});
+
+ipcMain.handle('mineradio-install-downloaded-update', async (_event, filePath) => {
+  try {
+    return await installDownloadedUpdate(filePath);
+  } catch (e) {
+    return { ok: false, error: e.message || 'INSTALL_UPDATE_FAILED' };
   }
 });
 
@@ -1380,7 +1575,12 @@ async function createWindow() {
     minWidth: 960,
     minHeight: 540,
     show: false,
-    frame: false,
+    frame: process.platform === 'darwin',
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    trafficLightPosition: process.platform === 'darwin' ? { x: 16, y: 16 } : undefined,
+    resizable: true,
+    maximizable: true,
+    fullscreenable: true,
     fullscreen: false,
     transparent: true,
     backgroundColor: '#00000000',
@@ -1420,6 +1620,14 @@ async function createWindow() {
 
   mainWindow.on('maximize', () => sendWindowState(mainWindow));
   mainWindow.on('unmaximize', () => sendWindowState(mainWindow));
+  mainWindow.on('enter-full-screen', () => {
+    windowFullscreenActive = true;
+    sendWindowState(mainWindow);
+  });
+  mainWindow.on('leave-full-screen', () => {
+    windowFullscreenActive = false;
+    sendWindowState(mainWindow);
+  });
   mainWindow.on('minimize', () => sendWindowState(mainWindow));
   mainWindow.on('restore', () => sendWindowState(mainWindow));
   mainWindow.on('show', () => sendWindowState(mainWindow));
@@ -1469,6 +1677,7 @@ if (!gotSingleInstanceLock) {
   });
 
   app.whenReady().then(async () => {
+    configureMediaPermissions();
     screen.on('display-metrics-changed', () => {
       positionDesktopLyricsWindow();
       positionWallpaperWindow();

@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.1.2
+
+- macOS 窗口体验优化：使用原生红黄绿窗口按钮，支持放大/还原，并调整默认窗口尺寸，避免启动时界面过宽或控件压在启动页上。
+- macOS 更新链路优化：应用内更新可下载当前仓库 Release 的 macOS 安装包，并尝试自动替换安装后重启，减少手动拖拽覆盖步骤。
+- 修复 macOS 摄像头手势权限：补充 Camera 权限声明和本地页面媒体权限处理，提升手势交互启动成功率，并增加异常提示与资源清理。
+- QQ 音乐播放修复：改进会员/音质真实可播判断，自动探测可用音源并在超清不可用时降级，避免 404、试听片段或不可播放链接直接中断。
+- QQ / 网易云音质设置拆分：两个平台分别保存音质偏好，避免 QQ 音源被网易云 Hi-Res/SVIP 选项错误影响。
+- 自动换源与切歌稳定性优化：改进同名歌曲匹配评分，降低误匹配 Live/伴奏/Remix 等版本的概率，并修复失败跳歌时可能重复跳到下下首的问题。
+- 启动页动画调整：隐藏启动期间右上角操作按钮，优化 Mine/radio 入场节奏和最终间距，避免文字被裁切、遮挡或重叠。
+
 ## v1.1.1
 
 - P0 installer safety fix: installation now defaults to the first available non-C drive from `D:\Mineradio` through `Z:\Mineradio`; it falls back to `C:\Mineradio` only when no D-Z drive exists.

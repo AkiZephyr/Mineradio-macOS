@@ -1594,6 +1594,14 @@ const QQ_QUALITY_CANDIDATE_TEMPLATES = [
   { prefix: 'M500', ext: '.mp3', level: 'standard', label: '128k MP3' },
   { prefix: 'C400', ext: '.m4a', level: 'aac', label: 'AAC/M4A' },
 ];
+const QUALITY_RANK = {
+  jymaster: 5,
+  hires: 4,
+  lossless: 3,
+  exhigh: 2,
+  standard: 1,
+  aac: 0,
+};
 function normalizeQualityPreference(value) {
   const raw = String(value || '').toLowerCase().trim();
   if (['jymaster', 'master', 'studio', 'svip'].includes(raw)) return 'jymaster';
@@ -1603,11 +1611,38 @@ function normalizeQualityPreference(value) {
   if (['standard', 'normal', '128', '128k', 'std'].includes(raw)) return 'standard';
   return 'hires';
 }
+function qualityRank(level) {
+  return QUALITY_RANK[String(level || '').toLowerCase()] ?? -1;
+}
+function qualityWasDowngraded(requested, resolved) {
+  const req = qualityRank(normalizeQualityPreference(requested));
+  const got = qualityRank(resolved);
+  return req >= 0 && got >= 0 && got < req;
+}
 function qualityCandidatesFrom(target, candidates) {
   target = normalizeQualityPreference(target);
   let start = candidates.findIndex(item => item.level === target);
   if (start < 0) start = 0;
   return candidates.slice(start);
+}
+function normalizeQQUrlInfoCode(info) {
+  if (!info) return 0;
+  return Number(info.result ?? info.code ?? info.errtype ?? 0) || 0;
+}
+function qqUrlInfoMessage(info) {
+  return String((info && (info.msg || info.tips || info.errmsg || info.message)) || '').trim();
+}
+function qqUrlInfoLooksTrial(info) {
+  if (!info) return false;
+  const text = JSON.stringify(info).toLowerCase();
+  return !!(info.trial || info.isTrial || info.is_trial || info.freeTrialInfo || info.preview || /试听|preview|trial/.test(text));
+}
+function qqPlayableUrlInfo(info) {
+  if (!info || !info.purl) return false;
+  const code = normalizeQQUrlInfoCode(info);
+  if (code && code !== 0) return false;
+  if (qqUrlInfoLooksTrial(info)) return false;
+  return true;
 }
 function hasNeteaseSvip(loginInfo) {
   return !!(loginInfo && loginInfo.loggedIn && (loginInfo.vipLevel === 'svip' || loginInfo.isSvip || Number(loginInfo.vipType || 0) >= 10));
@@ -2397,6 +2432,29 @@ function audioProxyHeadersFor(audioUrl, range) {
   return headers;
 }
 
+async function probeAudioUrl(audioUrl) {
+  if (!audioUrl) return { ok: false, status: 0, reason: 'EMPTY_URL' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6500);
+  try {
+    const response = await fetch(audioUrl, {
+      headers: audioProxyHeadersFor(audioUrl, 'bytes=0-0'),
+      signal: controller.signal,
+    });
+    const type = String(response.headers.get('content-type') || '').toLowerCase();
+    const badType = type && /(text\/html|application\/json|text\/plain)/.test(type);
+    return {
+      ok: response.status >= 200 && response.status < 400 && !badType,
+      status: response.status,
+      contentType: type,
+    };
+  } catch (e) {
+    return { ok: false, status: 0, reason: e && e.message || 'PROBE_FAILED' };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function audioContentTypeForUrl(audioUrl, upstreamType) {
   let pathname = '';
   try { pathname = new URL(audioUrl).pathname.toLowerCase(); } catch (e) {}
@@ -2736,23 +2794,37 @@ async function handleQQSongUrl(mid, mediaMid, qualityPreference) {
   }, { cookie: true });
   const data = json && json.req_0 && json.req_0.data;
   const infos = (data && Array.isArray(data.midurlinfo)) ? data.midurlinfo : [];
-  const info = infos.find(item => item && item.purl) || infos[0];
-  const purl = info && info.purl;
-  if (purl) {
-    const sip = (data.sip && data.sip[0]) || 'https://ws.stream.qqmusic.qq.com/';
-    const fileMeta = fileCandidates.find(item => item.filename === info.filename) || {};
+  const sip = (data && data.sip && data.sip[0]) || 'https://ws.stream.qqmusic.qq.com/';
+  let info = infos.find(item => item && item.purl) || infos[0];
+  let fileMeta = info ? (fileCandidates.find(item => item.filename === info.filename) || {}) : {};
+  let lastProbe = null;
+  const playableInfos = infos.filter(qqPlayableUrlInfo);
+  for (const candidateInfo of playableInfos) {
+    const candidateMeta = fileCandidates.find(item => item.filename === candidateInfo.filename) || {};
+    const candidateUrl = sip + candidateInfo.purl;
+    const probe = await probeAudioUrl(candidateUrl);
+    lastProbe = probe;
+    if (!probe.ok) {
+      console.warn('[QQSongUrl] probe failed:', candidateMeta.level || candidateInfo.filename || '', probe.status || probe.reason || '');
+      continue;
+    }
+    info = candidateInfo;
+    fileMeta = candidateMeta;
     return {
       provider: 'qq',
-      url: sip + purl,
+      url: candidateUrl,
       trial: false,
       playable: true,
       level: fileMeta.level || info.filename || '',
       quality: fileMeta.label || info.filename || '',
       filename: info.filename || '',
       requestedQuality,
+      downgraded: qualityWasDowngraded(requestedQuality, fileMeta.level),
+      playbackKeyReady: !!(uin && playbackKey),
     };
   }
-  const restriction = classifyQQPlaybackRestriction(info, {
+  const restrictionInfo = info || infos.find(item => item && normalizeQQUrlInfoCode(item)) || null;
+  const restriction = classifyQQPlaybackRestriction(restrictionInfo, {
     hasSession: !!(uin && musicKey),
     hasPlaybackKey: !!(uin && playbackKey),
   });
@@ -2766,8 +2838,13 @@ async function handleQQSongUrl(mid, mediaMid, qualityPreference) {
     restriction,
     reason: restriction.category,
     message: restriction.message,
-    qqCode: info && (info.result || info.code || info.errtype),
-    rawMessage: info && (info.msg || info.tips || info.errmsg || ''),
+    level: fileMeta.level || '',
+    quality: fileMeta.label || '',
+    filename: info && info.filename || '',
+    trial: !!(info && info.purl && qqUrlInfoLooksTrial(info)),
+    probe: lastProbe,
+    qqCode: restrictionInfo && (restrictionInfo.result || restrictionInfo.code || restrictionInfo.errtype),
+    rawMessage: qqUrlInfoMessage(restrictionInfo),
     tried: fileCandidates.map(item => item.label + ' · ' + item.filename),
     requestedQuality,
   };
