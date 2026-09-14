@@ -1,3 +1,4 @@
+> 简体中文 | [English](./README.en.md)
 # Mineradio macOS
 
 ![Mineradio 暗场启动页](./docs/assets/readme/cinema-beat-smoke.png)
