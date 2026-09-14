@@ -1,6 +1,15 @@
-# Mineradio macOS
+<div align="center">
 
-> English | [简体中文](./README.md)
+<img src="./docs/assets/readme/cinema-beat-smoke.png" alt="Mineradio — Private Visual Radio" width="720" />
+
+<br /><br />
+
+[![English](https://img.shields.io/badge/English-Current%20Page-4A90D9?style=for-the-badge)](./README.en.md)
+[![简体中文](https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-%E5%88%87%E6%8D%A2-9CA3AF?style=for-the-badge)](./README.md)
+
+</div>
+
+# Mineradio macOS
 
 Mineradio macOS is an unofficial macOS-focused port and maintained edition of [XxHuberrr/Mineradio](https://github.com/XxHuberrr/Mineradio). This repository continues the project with a Mac-first desktop experience: completing macOS packaging, platform paths and update asset selection, and exploring macOS-native motion, window layering and immersive playback on top of it.
 
