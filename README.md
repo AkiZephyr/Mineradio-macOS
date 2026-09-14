@@ -5,7 +5,7 @@
 
 </div>
 
-# Mineradio macOS# Mineradio macOS
+# Mineradio macOS
 
 ![Mineradio 暗场启动页](./docs/assets/readme/cinema-beat-smoke.png)
 
