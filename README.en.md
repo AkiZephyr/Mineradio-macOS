@@ -93,40 +93,6 @@ Without an Apple Developer ID configured, you can temporarily skip signing for l
 CSC_IDENTITY_AUTO_DISCOVERY=false npm run build:mac
 ```
 
-## Windows Build
-
-The original Windows build scripts are kept in this repository for compatibility with upstream:
-
-```bash
-npm run build:win
-npm run build:win:dir
-```
-
-Windows users looking for a stable installer are advised to use the official upstream release.
-
-## Relationship with Upstream
-
-This repository is derived from:
-
-<https://github.com/XxHuberrr/Mineradio>
-
-Main areas of divergence:
-
-- macOS packaging and release configuration
-- macOS user data paths and cache directories
-- macOS update asset selection
-- macOS window, wallpaper and visual experience maintenance
-- Future Mac-specific features and motion exploration
-
-It is recommended to keep two remotes in your local clone:
-
-```bash
-origin   https://github.com/AkiZephyr/Mineradio-macOS.git
-upstream https://github.com/XxHuberrr/Mineradio.git
-```
-
-This way you can maintain the independent Mac edition while syncing upstream updates when needed.
-
 ## Update Mechanism
 
 Mineradio queries the GitHub Releases `latest` endpoint to detect new versions. The macOS build reads `latest-mac.yml` first and downloads the `.dmg` / `.zip` artifact matching the current platform.
