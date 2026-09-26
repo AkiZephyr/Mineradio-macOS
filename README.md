@@ -91,40 +91,6 @@ npm run build:mac:all
 CSC_IDENTITY_AUTO_DISCOVERY=false npm run build:mac
 ```
 
-## Windows 构建
-
-本仓库仍保留原项目的 Windows 构建脚本，便于和上游保持兼容：
-
-```bash
-npm run build:win
-npm run build:win:dir
-```
-
-Windows 用户如需稳定安装包，建议优先使用上游官方发布版本。
-
-## 与上游的关系
-
-本仓库源自：
-
-[https://github.com/XxHuberrr/Mineradio](https://github.com/XxHuberrr/Mineradio)
-
-主要差异方向：
-
-- macOS 打包与发布配置
-- macOS 用户数据路径和缓存目录适配
-- macOS 更新资产选择
-- macOS 窗口、壁纸和视觉体验维护
-- 后续面向 Mac 的独立功能和动效探索
-
-本地仓库建议保留两个远程：
-
-```bash
-origin   https://github.com/AkiZephyr/Mineradio-macOS.git
-upstream https://github.com/XxHuberrr/Mineradio.git
-```
-
-这样既可以维护独立 Mac 版本，也可以按需同步原项目更新。
-
 ## 更新机制
 
 Mineradio 会请求 GitHub Releases latest 检测新版本。macOS 版本优先读取 `latest-mac.yml`，并下载适合当前平台的 `.dmg` / `.zip` 产物。
